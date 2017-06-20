@@ -1,0 +1,15 @@
+PODS:
+  - Aspects (1.4.1)
+  - JZNavigationExtension (1.5.0.1)
+
+DEPENDENCIES:
+  - Aspects
+  - JZNavigationExtension
+
+SPEC CHECKSUMS:
+  Aspects: 7595ba96a6727a58ebcbfc954497fc5d2fdde546
+  JZNavigationExtension: 7b95d2b1c48846b8bedcb40d767448f14cb9a0b7
+
+PODFILE CHECKSUM: 85facaa6a8e93f14fe72a3d909895018726e901a
+
+COCOAPODS: 1.1.1

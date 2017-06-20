@@ -1,0 +1,168 @@
+<html>
+    <head>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0"/>
+        <!--    加载CSS    -->
+<!--        <link rel="stylesheet" href="css/style.css">-->
+        <!--    post方法    -->
+        <script>
+            //POST request example:
+            //post('URL', {key: 'value'});
+            function post(path, params) {
+                var method = "post";
+                var form = document.createElement("form");
+                form.setAttribute("method", method);
+                form.setAttribute("action", path);
+                
+                for(var key in params) {
+                    if(params.hasOwnProperty(key)) {
+                        var hiddenField = document.createElement("input");
+                        hiddenField.setAttribute("type", "hidden");
+                        hiddenField.setAttribute("name", key);
+                        // url 解码后的数据
+                        hiddenField.setAttribute("value", decodeURI(params[key]));
+                        
+                        form.appendChild(hiddenField);
+                    }
+                }
+                document.body.appendChild(form);
+                form.submit();
+            }
+        </script>
+        <style>
+            body {
+                margin: 0;
+                text-align:center;
+            }
+            .loader {
+                position: absolute;
+                top: 35%;
+                left: 40%;
+                margin-left: 10%;
+                transform: translate3d(-50%, -50%, 0);
+                -webkit-transform: translate3d(-50%, -50%, 0);
+            }
+            .dot {
+                width: 24px;
+                height: 24px;
+                background: #3ac;
+                border-radius: 100%;
+                display: inline-block;
+                animation: slide 1s infinite;
+                -webkit-animation: animation: slide 1s infinite;
+            }
+            .dot:nth-child(1) {
+                background: #32aacc;
+                animation-delay: 0.1s;
+                -webkit-animation-delay: 0.1s;
+            }
+            .dot:nth-child(2) {
+                background: #64aacc;
+                animation-delay: 0.2s;
+                -webkit-animation-delay: 0.2s;
+            }
+            .dot:nth-child(3) {
+                background: #96aacc;
+                animation-delay: 0.3s;
+                -webkit-animation-delay: 0.3s;
+            }
+            .dot:nth-child(4) {
+                background: #c8aacc;
+                animation-delay: 0.4s;
+                -webkit-animation-delay: 0.4s;
+            }
+            .dot:nth-child(5) {
+                background: #faaacc;
+                animation-delay: 0.5s;
+                -webkit-animation-delay: 0.5s;
+            }
+            @keyframes slide {
+                0% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+                50% {
+                    opacity: 0.3;
+                    transform: scale(2);
+                    -webkit-transform: scale(2);
+                }
+                100% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+            }
+        
+            @-webkit-keyframes slide {
+                0% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+                50% {
+                    opacity: 0.3;
+                    transform: scale(2);
+                    -webkit-transform: scale(2);
+                }
+                100% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+            }
+            @-moz-keyframes slide {
+                0% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+                50% {
+                    opacity: 0.3;
+                    transform: scale(2);
+                    -webkit-transform: scale(2);
+                }
+                100% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+            }
+            @-o-keyframes slide {
+                0% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+                50% {
+                    opacity: 0.3;
+                    transform: scale(2);
+                    -webkit-transform: scale(2);
+                }
+                100% {
+                    transform: scale(1);
+                    -webkit-transform: scale(1);
+                }
+            }
+        
+            .info {
+                position: absolute;
+                top: 60%;
+                left: 40%;
+                margin-left: 10%;
+                transform: translate3d(-50%, -50%, 0);
+                -webkit-transform: translate3d(-50%, -50%, 0);
+            }
+            p {
+                font-family: "Arial","Microsoft YaHei","黑体","宋体",sans-serif;
+                text-align:center;
+                font-size: 15px;
+                color: #2C4A7A;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="loader">
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+            <div class="dot"></div>
+        </div>
+        <div class="info">
+            <p>是谁来自山川湖海<br/><br/>却囿于昼夜，厨房与爱</p>
+        </div>
+    </body>
+</html>

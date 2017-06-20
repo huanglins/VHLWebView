@@ -1,0 +1,672 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		04C2CB0D060DE47C2F232AF0A778B6EA /* UIToolbar+JZExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = F4010B3EDBAD7DFD494048BF84A0E531 /* UIToolbar+JZExtension.m */; };
+		0CEF0C8769662CEC14649C5FD2CBE0EB /* Aspects-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 21E57839C3AF2626C5C84D5E3BBE7203 /* Aspects-dummy.m */; };
+		155A3B090EB863D292CDBAE308A4D2AC /* UINavigationController+JZExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 65EB0DE78070FF230E38F9FF2C3BF530 /* UINavigationController+JZExtension.m */; };
+		33B292DBA270BE414EBA8BBC0208ED0B /* _JZValue.m in Sources */ = {isa = PBXBuildFile; fileRef = A95C9DC9715362450DAED62A0DEE97B8 /* _JZValue.m */; };
+		3669A60131E8B1436A39BC28C976CDB7 /* _JZValue.h in Headers */ = {isa = PBXBuildFile; fileRef = 07DBEA674FC1A65B11896E09FB6D18D0 /* _JZValue.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		37639CE6E6EC8F181CC8B226B15DB2B7 /* UINavigationBar+JZExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = CEADAD06F5B0A9B7044274D58D4CAE26 /* UINavigationBar+JZExtension.m */; };
+		3E9FE6A1C209C6F445E74C0DF4791ADB /* _JZNavigationInteractiveTransition.h in Headers */ = {isa = PBXBuildFile; fileRef = BB696DF0E5B95080C44DB6CF258EFA06 /* _JZNavigationInteractiveTransition.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		3F0FA5287E8D6F5BF386D590340EDAC1 /* UINavigationController+JZExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = 1CB8F4CA83C1084B0A80EF109A02C5EB /* UINavigationController+JZExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		4819E4ACA64EA8CBC0CF5878A1BCFE6F /* UIViewController+JZExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = C671738928271066EB074C80B13920FB /* UIViewController+JZExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		51036AFC1D5400FDEE9205B52E9BE798 /* NSNumber+JZExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = A579AB46D268535CC525DD31B4A9EDEF /* NSNumber+JZExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		6318CFF57C5697891E9B45A4868E5F8C /* Aspects.h in Headers */ = {isa = PBXBuildFile; fileRef = D634A11133EEEC7F6958011F3E8419D2 /* Aspects.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		770F86DBFD6E488F8DE91862345C209E /* UIViewController+JZExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = 8FA93F652C54C996D75EA8E46E036D23 /* UIViewController+JZExtension.m */; };
+		821F178E38B5C3B04EACBD6E088B7401 /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBB3DE36805AF21409EC968A9691732F /* Foundation.framework */; };
+		9EA92775895E123A957A18C9C3AC9FD8 /* NSNumber+JZExtension.m in Sources */ = {isa = PBXBuildFile; fileRef = D4898F3750DA9243AC559FECAEEC47D6 /* NSNumber+JZExtension.m */; };
+		A42D2A624D44704FF6F386E7F41B78B0 /* UINavigationBar+JZExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = 8AFF75977A9BB256AD9830B1267AE3A9 /* UINavigationBar+JZExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		A970D584295EF48F38BD294C27DC42B9 /* _JZ-objc-internal.h in Headers */ = {isa = PBXBuildFile; fileRef = B31CBEA6163140B1233B786F81A8F44B /* _JZ-objc-internal.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		B2BB9AE29FEE1B5A4A36927C9433F27D /* _JZNavigationInteractiveTransition.m in Sources */ = {isa = PBXBuildFile; fileRef = 59166D2BB684A2F6B4915350346E34A0 /* _JZNavigationInteractiveTransition.m */; };
+		BCEE26C1E0A1724F8E9A692E156F12C5 /* Pods-VHLWebView-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = 98E6C7C8304A4F92F6CE52DB7E48C11E /* Pods-VHLWebView-dummy.m */; };
+		C8D9EEF5A0E0D508C2D0920D19CDC230 /* JZNavigationExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = 00CC2D958CCF5D70031E210445AEB7D9 /* JZNavigationExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+		D4F8546A82014998880F4C0E9465055F /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBB3DE36805AF21409EC968A9691732F /* Foundation.framework */; };
+		D77458A1CE4FFFD8846599C02325966B /* Aspects.m in Sources */ = {isa = PBXBuildFile; fileRef = 176FCF2CFD87981A4FC77F8E1E3FE471 /* Aspects.m */; };
+		DD3C8BFABE0E069040B2AB7F425D5C6E /* JZNavigationExtension-dummy.m in Sources */ = {isa = PBXBuildFile; fileRef = EE27C955387D98B861CBCDF7B9E8800F /* JZNavigationExtension-dummy.m */; };
+		E326F2CDD483A948A00E54A5C2BB8B6E /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CBB3DE36805AF21409EC968A9691732F /* Foundation.framework */; };
+		EF3423C6DE2DFB6A95F44C182EF621FB /* UIToolbar+JZExtension.h in Headers */ = {isa = PBXBuildFile; fileRef = 914B4D95A69F0FEFD190278C6CC94EE0 /* UIToolbar+JZExtension.h */; settings = {ATTRIBUTES = (Public, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		22EAC8674D24866C134DA051C40152E7 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C7C5FD310966070D9553E5B95C59641B;
+			remoteInfo = Aspects;
+		};
+		3BD25BD6C4A00EA889892F0D2A399EAA /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0FBCFD31BA63C194601C25DFDC2C78C0;
+			remoteInfo = JZNavigationExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		00CC2D958CCF5D70031E210445AEB7D9 /* JZNavigationExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = JZNavigationExtension.h; path = JZNavigationExtension/JZNavigationExtension.h; sourceTree = "<group>"; };
+		0701C204C333FD2152E1F9AB3DF46265 /* Pods-VHLWebView-frameworks.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-VHLWebView-frameworks.sh"; sourceTree = "<group>"; };
+		07DBEA674FC1A65B11896E09FB6D18D0 /* _JZValue.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = _JZValue.h; path = JZNavigationExtension/Private/_JZValue.h; sourceTree = "<group>"; };
+		16E076E6CD277D9948B15B6FE680DC71 /* Pods-VHLWebView.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-VHLWebView.release.xcconfig"; sourceTree = "<group>"; };
+		175FF96FCB832D33AB0E4DA1D215F826 /* Pods-VHLWebView-acknowledgements.markdown */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text; path = "Pods-VHLWebView-acknowledgements.markdown"; sourceTree = "<group>"; };
+		176FCF2CFD87981A4FC77F8E1E3FE471 /* Aspects.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = Aspects.m; sourceTree = "<group>"; };
+		1CB8F4CA83C1084B0A80EF109A02C5EB /* UINavigationController+JZExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UINavigationController+JZExtension.h"; path = "JZNavigationExtension/UINavigationController+JZExtension.h"; sourceTree = "<group>"; };
+		201C40640C5A9812D51C16E0D894EBD6 /* libAspects.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libAspects.a; path = libAspects.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		21E57839C3AF2626C5C84D5E3BBE7203 /* Aspects-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Aspects-dummy.m"; sourceTree = "<group>"; };
+		2ADA223D3AD45C6CBA0F2AF8866840F5 /* Aspects.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = Aspects.xcconfig; sourceTree = "<group>"; };
+		34B91971D27979523901CE839DE59CCE /* JZNavigationExtension-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "JZNavigationExtension-prefix.pch"; sourceTree = "<group>"; };
+		58D0FE788FCE47662540BF218F716C7F /* libJZNavigationExtension.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = libJZNavigationExtension.a; path = libJZNavigationExtension.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		59166D2BB684A2F6B4915350346E34A0 /* _JZNavigationInteractiveTransition.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = _JZNavigationInteractiveTransition.m; path = JZNavigationExtension/Private/_JZNavigationInteractiveTransition.m; sourceTree = "<group>"; };
+		6174EBB3D80C40A85097F7D56B136CD2 /* JZNavigationExtension.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = JZNavigationExtension.xcconfig; sourceTree = "<group>"; };
+		65EB0DE78070FF230E38F9FF2C3BF530 /* UINavigationController+JZExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UINavigationController+JZExtension.m"; path = "JZNavigationExtension/UINavigationController+JZExtension.m"; sourceTree = "<group>"; };
+		8AFF75977A9BB256AD9830B1267AE3A9 /* UINavigationBar+JZExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UINavigationBar+JZExtension.h"; path = "JZNavigationExtension/Private/UINavigationBar+JZExtension.h"; sourceTree = "<group>"; };
+		8FA93F652C54C996D75EA8E46E036D23 /* UIViewController+JZExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIViewController+JZExtension.m"; path = "JZNavigationExtension/UIViewController+JZExtension.m"; sourceTree = "<group>"; };
+		914B4D95A69F0FEFD190278C6CC94EE0 /* UIToolbar+JZExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIToolbar+JZExtension.h"; path = "JZNavigationExtension/Private/UIToolbar+JZExtension.h"; sourceTree = "<group>"; };
+		93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */ = {isa = PBXFileReference; explicitFileType = text.script.ruby; includeInIndex = 1; lastKnownFileType = text; name = Podfile; path = ../Podfile; sourceTree = SOURCE_ROOT; xcLanguageSpecificationIdentifier = xcode.lang.ruby; };
+		9475F40D62ED7F1C4EE2F5055F821538 /* Pods-VHLWebView-resources.sh */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.script.sh; path = "Pods-VHLWebView-resources.sh"; sourceTree = "<group>"; };
+		98E6C7C8304A4F92F6CE52DB7E48C11E /* Pods-VHLWebView-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "Pods-VHLWebView-dummy.m"; sourceTree = "<group>"; };
+		A3A2826FF249776A5B2D96E7AF30CBED /* Aspects-prefix.pch */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = "Aspects-prefix.pch"; sourceTree = "<group>"; };
+		A579AB46D268535CC525DD31B4A9EDEF /* NSNumber+JZExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "NSNumber+JZExtension.h"; path = "JZNavigationExtension/Private/NSNumber+JZExtension.h"; sourceTree = "<group>"; };
+		A95C9DC9715362450DAED62A0DEE97B8 /* _JZValue.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = _JZValue.m; path = JZNavigationExtension/Private/_JZValue.m; sourceTree = "<group>"; };
+		AD74D73275E0A727D210C51893461573 /* Pods-VHLWebView.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; path = "Pods-VHLWebView.debug.xcconfig"; sourceTree = "<group>"; };
+		B31CBEA6163140B1233B786F81A8F44B /* _JZ-objc-internal.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "_JZ-objc-internal.h"; path = "JZNavigationExtension/Private/_JZ-objc-internal.h"; sourceTree = "<group>"; };
+		BB696DF0E5B95080C44DB6CF258EFA06 /* _JZNavigationInteractiveTransition.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = _JZNavigationInteractiveTransition.h; path = JZNavigationExtension/Private/_JZNavigationInteractiveTransition.h; sourceTree = "<group>"; };
+		C671738928271066EB074C80B13920FB /* UIViewController+JZExtension.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; name = "UIViewController+JZExtension.h"; path = "JZNavigationExtension/UIViewController+JZExtension.h"; sourceTree = "<group>"; };
+		CBB3DE36805AF21409EC968A9691732F /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS10.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
+		CEADAD06F5B0A9B7044274D58D4CAE26 /* UINavigationBar+JZExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UINavigationBar+JZExtension.m"; path = "JZNavigationExtension/Private/UINavigationBar+JZExtension.m"; sourceTree = "<group>"; };
+		D2E0A554FCBCA2D134B4B1D5B935960C /* Pods-VHLWebView-acknowledgements.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = "Pods-VHLWebView-acknowledgements.plist"; sourceTree = "<group>"; };
+		D4898F3750DA9243AC559FECAEEC47D6 /* NSNumber+JZExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "NSNumber+JZExtension.m"; path = "JZNavigationExtension/Private/NSNumber+JZExtension.m"; sourceTree = "<group>"; };
+		D634A11133EEEC7F6958011F3E8419D2 /* Aspects.h */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.h; path = Aspects.h; sourceTree = "<group>"; };
+		DB93003BEA9C8EBF44C09B637EEEE609 /* libPods-VHLWebView.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; name = "libPods-VHLWebView.a"; path = "libPods-VHLWebView.a"; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE27C955387D98B861CBCDF7B9E8800F /* JZNavigationExtension-dummy.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; path = "JZNavigationExtension-dummy.m"; sourceTree = "<group>"; };
+		F4010B3EDBAD7DFD494048BF84A0E531 /* UIToolbar+JZExtension.m */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.c.objc; name = "UIToolbar+JZExtension.m"; path = "JZNavigationExtension/Private/UIToolbar+JZExtension.m"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		46AC14C78BCA4AF485C27BFE8899A96B /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				821F178E38B5C3B04EACBD6E088B7401 /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		4BB55C8FE3AD49FAFC856EA99B4B4DDE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E326F2CDD483A948A00E54A5C2BB8B6E /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FF7BBE728C49110B1F0CD42AB3E4F3AB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				D4F8546A82014998880F4C0E9465055F /* Foundation.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08B5F0698CA384465E141E97431C9C06 /* Aspects */ = {
+			isa = PBXGroup;
+			children = (
+				D634A11133EEEC7F6958011F3E8419D2 /* Aspects.h */,
+				176FCF2CFD87981A4FC77F8E1E3FE471 /* Aspects.m */,
+				6F94F4CC5C3B487D15DE229DBF8F36AB /* Support Files */,
+			);
+			name = Aspects;
+			path = Aspects;
+			sourceTree = "<group>";
+		};
+		3EB170FE1C90B55148DA10DBBF37B1E1 /* Targets Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				6AAD634585E2FB5DF9C2967553B0236D /* Pods-VHLWebView */,
+			);
+			name = "Targets Support Files";
+			sourceTree = "<group>";
+		};
+		6AAD634585E2FB5DF9C2967553B0236D /* Pods-VHLWebView */ = {
+			isa = PBXGroup;
+			children = (
+				175FF96FCB832D33AB0E4DA1D215F826 /* Pods-VHLWebView-acknowledgements.markdown */,
+				D2E0A554FCBCA2D134B4B1D5B935960C /* Pods-VHLWebView-acknowledgements.plist */,
+				98E6C7C8304A4F92F6CE52DB7E48C11E /* Pods-VHLWebView-dummy.m */,
+				0701C204C333FD2152E1F9AB3DF46265 /* Pods-VHLWebView-frameworks.sh */,
+				9475F40D62ED7F1C4EE2F5055F821538 /* Pods-VHLWebView-resources.sh */,
+				AD74D73275E0A727D210C51893461573 /* Pods-VHLWebView.debug.xcconfig */,
+				16E076E6CD277D9948B15B6FE680DC71 /* Pods-VHLWebView.release.xcconfig */,
+			);
+			name = "Pods-VHLWebView";
+			path = "Target Support Files/Pods-VHLWebView";
+			sourceTree = "<group>";
+		};
+		6C718AEF870FD5530ECAB7F694285C1D /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				6174EBB3D80C40A85097F7D56B136CD2 /* JZNavigationExtension.xcconfig */,
+				EE27C955387D98B861CBCDF7B9E8800F /* JZNavigationExtension-dummy.m */,
+				34B91971D27979523901CE839DE59CCE /* JZNavigationExtension-prefix.pch */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/JZNavigationExtension";
+			sourceTree = "<group>";
+		};
+		6F14572632FEAB81F764A8F3365712A5 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				201C40640C5A9812D51C16E0D894EBD6 /* libAspects.a */,
+				58D0FE788FCE47662540BF218F716C7F /* libJZNavigationExtension.a */,
+				DB93003BEA9C8EBF44C09B637EEEE609 /* libPods-VHLWebView.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6F94F4CC5C3B487D15DE229DBF8F36AB /* Support Files */ = {
+			isa = PBXGroup;
+			children = (
+				2ADA223D3AD45C6CBA0F2AF8866840F5 /* Aspects.xcconfig */,
+				21E57839C3AF2626C5C84D5E3BBE7203 /* Aspects-dummy.m */,
+				A3A2826FF249776A5B2D96E7AF30CBED /* Aspects-prefix.pch */,
+			);
+			name = "Support Files";
+			path = "../Target Support Files/Aspects";
+			sourceTree = "<group>";
+		};
+		7531C8F8DE19F1AA3C8A7AC97A91DC29 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				CBB3DE36805AF21409EC968A9691732F /* Foundation.framework */,
+			);
+			name = iOS;
+			sourceTree = "<group>";
+		};
+		7DB346D0F39D3F0E887471402A8071AB = {
+			isa = PBXGroup;
+			children = (
+				93A4A3777CF96A4AAC1D13BA6DCCEA73 /* Podfile */,
+				BC3CA7F9E30CC8F7E2DD044DD34432FC /* Frameworks */,
+				F0715BD753A01AC7D8B89B70D1EE8D8E /* Pods */,
+				6F14572632FEAB81F764A8F3365712A5 /* Products */,
+				3EB170FE1C90B55148DA10DBBF37B1E1 /* Targets Support Files */,
+			);
+			sourceTree = "<group>";
+		};
+		BC3CA7F9E30CC8F7E2DD044DD34432FC /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				7531C8F8DE19F1AA3C8A7AC97A91DC29 /* iOS */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		D25492EF195346B26BB53577698AF915 /* JZNavigationExtension */ = {
+			isa = PBXGroup;
+			children = (
+				B31CBEA6163140B1233B786F81A8F44B /* _JZ-objc-internal.h */,
+				BB696DF0E5B95080C44DB6CF258EFA06 /* _JZNavigationInteractiveTransition.h */,
+				59166D2BB684A2F6B4915350346E34A0 /* _JZNavigationInteractiveTransition.m */,
+				07DBEA674FC1A65B11896E09FB6D18D0 /* _JZValue.h */,
+				A95C9DC9715362450DAED62A0DEE97B8 /* _JZValue.m */,
+				00CC2D958CCF5D70031E210445AEB7D9 /* JZNavigationExtension.h */,
+				A579AB46D268535CC525DD31B4A9EDEF /* NSNumber+JZExtension.h */,
+				D4898F3750DA9243AC559FECAEEC47D6 /* NSNumber+JZExtension.m */,
+				8AFF75977A9BB256AD9830B1267AE3A9 /* UINavigationBar+JZExtension.h */,
+				CEADAD06F5B0A9B7044274D58D4CAE26 /* UINavigationBar+JZExtension.m */,
+				1CB8F4CA83C1084B0A80EF109A02C5EB /* UINavigationController+JZExtension.h */,
+				65EB0DE78070FF230E38F9FF2C3BF530 /* UINavigationController+JZExtension.m */,
+				914B4D95A69F0FEFD190278C6CC94EE0 /* UIToolbar+JZExtension.h */,
+				F4010B3EDBAD7DFD494048BF84A0E531 /* UIToolbar+JZExtension.m */,
+				C671738928271066EB074C80B13920FB /* UIViewController+JZExtension.h */,
+				8FA93F652C54C996D75EA8E46E036D23 /* UIViewController+JZExtension.m */,
+				6C718AEF870FD5530ECAB7F694285C1D /* Support Files */,
+			);
+			name = JZNavigationExtension;
+			path = JZNavigationExtension;
+			sourceTree = "<group>";
+		};
+		F0715BD753A01AC7D8B89B70D1EE8D8E /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				08B5F0698CA384465E141E97431C9C06 /* Aspects */,
+				D25492EF195346B26BB53577698AF915 /* JZNavigationExtension */,
+			);
+			name = Pods;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		0838161285D7F3F57DBEEAF1DF631472 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6318CFF57C5697891E9B45A4868E5F8C /* Aspects.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1898A2BBA01024D66EC430B680ED1E92 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A970D584295EF48F38BD294C27DC42B9 /* _JZ-objc-internal.h in Headers */,
+				3E9FE6A1C209C6F445E74C0DF4791ADB /* _JZNavigationInteractiveTransition.h in Headers */,
+				3669A60131E8B1436A39BC28C976CDB7 /* _JZValue.h in Headers */,
+				C8D9EEF5A0E0D508C2D0920D19CDC230 /* JZNavigationExtension.h in Headers */,
+				51036AFC1D5400FDEE9205B52E9BE798 /* NSNumber+JZExtension.h in Headers */,
+				A42D2A624D44704FF6F386E7F41B78B0 /* UINavigationBar+JZExtension.h in Headers */,
+				3F0FA5287E8D6F5BF386D590340EDAC1 /* UINavigationController+JZExtension.h in Headers */,
+				EF3423C6DE2DFB6A95F44C182EF621FB /* UIToolbar+JZExtension.h in Headers */,
+				4819E4ACA64EA8CBC0CF5878A1BCFE6F /* UIViewController+JZExtension.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		0FBCFD31BA63C194601C25DFDC2C78C0 /* JZNavigationExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 54D3B494D3F2395A76B78730C1F83EA7 /* Build configuration list for PBXNativeTarget "JZNavigationExtension" */;
+			buildPhases = (
+				49B0AB5E9A9A1FDB2BB7173411C76DF5 /* Sources */,
+				4BB55C8FE3AD49FAFC856EA99B4B4DDE /* Frameworks */,
+				1898A2BBA01024D66EC430B680ED1E92 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = JZNavigationExtension;
+			productName = JZNavigationExtension;
+			productReference = 58D0FE788FCE47662540BF218F716C7F /* libJZNavigationExtension.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		2DD6608893129866CB45D7E2CD98E92D /* Pods-VHLWebView */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 33905E7A87686803A1F3DCE43B7CE659 /* Build configuration list for PBXNativeTarget "Pods-VHLWebView" */;
+			buildPhases = (
+				29893C325115DD8185772E2C28C5C089 /* Sources */,
+				46AC14C78BCA4AF485C27BFE8899A96B /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				52B39D574CA7855ACA2591AAA77A5032 /* PBXTargetDependency */,
+				3D67E14FBCC51D7389FCFB0136CCE2C4 /* PBXTargetDependency */,
+			);
+			name = "Pods-VHLWebView";
+			productName = "Pods-VHLWebView";
+			productReference = DB93003BEA9C8EBF44C09B637EEEE609 /* libPods-VHLWebView.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+		C7C5FD310966070D9553E5B95C59641B /* Aspects */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = ADDD598D97160FAFC23522D96D16607C /* Build configuration list for PBXNativeTarget "Aspects" */;
+			buildPhases = (
+				333DA74B4E797F48FFF01D823B85E3CC /* Sources */,
+				FF7BBE728C49110B1F0CD42AB3E4F3AB /* Frameworks */,
+				0838161285D7F3F57DBEEAF1DF631472 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Aspects;
+			productName = Aspects;
+			productReference = 201C40640C5A9812D51C16E0D894EBD6 /* libAspects.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		D41D8CD98F00B204E9800998ECF8427E /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 0730;
+				LastUpgradeCheck = 0700;
+			};
+			buildConfigurationList = 2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 7DB346D0F39D3F0E887471402A8071AB;
+			productRefGroup = 6F14572632FEAB81F764A8F3365712A5 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C7C5FD310966070D9553E5B95C59641B /* Aspects */,
+				0FBCFD31BA63C194601C25DFDC2C78C0 /* JZNavigationExtension */,
+				2DD6608893129866CB45D7E2CD98E92D /* Pods-VHLWebView */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		29893C325115DD8185772E2C28C5C089 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BCEE26C1E0A1724F8E9A692E156F12C5 /* Pods-VHLWebView-dummy.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		333DA74B4E797F48FFF01D823B85E3CC /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0CEF0C8769662CEC14649C5FD2CBE0EB /* Aspects-dummy.m in Sources */,
+				D77458A1CE4FFFD8846599C02325966B /* Aspects.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		49B0AB5E9A9A1FDB2BB7173411C76DF5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B2BB9AE29FEE1B5A4A36927C9433F27D /* _JZNavigationInteractiveTransition.m in Sources */,
+				33B292DBA270BE414EBA8BBC0208ED0B /* _JZValue.m in Sources */,
+				DD3C8BFABE0E069040B2AB7F425D5C6E /* JZNavigationExtension-dummy.m in Sources */,
+				9EA92775895E123A957A18C9C3AC9FD8 /* NSNumber+JZExtension.m in Sources */,
+				37639CE6E6EC8F181CC8B226B15DB2B7 /* UINavigationBar+JZExtension.m in Sources */,
+				155A3B090EB863D292CDBAE308A4D2AC /* UINavigationController+JZExtension.m in Sources */,
+				04C2CB0D060DE47C2F232AF0A778B6EA /* UIToolbar+JZExtension.m in Sources */,
+				770F86DBFD6E488F8DE91862345C209E /* UIViewController+JZExtension.m in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		3D67E14FBCC51D7389FCFB0136CCE2C4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = JZNavigationExtension;
+			target = 0FBCFD31BA63C194601C25DFDC2C78C0 /* JZNavigationExtension */;
+			targetProxy = 3BD25BD6C4A00EA889892F0D2A399EAA /* PBXContainerItemProxy */;
+		};
+		52B39D574CA7855ACA2591AAA77A5032 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = Aspects;
+			target = C7C5FD310966070D9553E5B95C59641B /* Aspects */;
+			targetProxy = 22EAC8674D24866C134DA051C40152E7 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		19AB58D8D1C315DD54702C923E77CC22 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 16E076E6CD277D9948B15B6FE680DC71 /* Pods-VHLWebView.release.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		24C31621297DE01492307C2B6827020F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6174EBB3D80C40A85097F7D56B136CD2 /* JZNavigationExtension.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/JZNavigationExtension/JZNavigationExtension-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		79B0C2E66EFA9917ED6EDDB8FC6A7684 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COPY_PHASE_STRIP = YES;
+				ENABLE_NS_ASSERTIONS = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_RELEASE=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				PROVISIONING_PROFILE_SPECIFIER = NO_SIGNING/;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = "${SRCROOT}/../build";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		7C316EC1C9660FBD6475B6513DE61DB0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2ADA223D3AD45C6CBA0F2AF8866840F5 /* Aspects.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/Aspects/Aspects-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+		84893E102A1A1FB8FAE0E269E0B3326A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 2ADA223D3AD45C6CBA0F2AF8866840F5 /* Aspects.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/Aspects/Aspects-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 6.0;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		8A39D1FD3A9A5DF66EC0B4E7BF407B26 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = AD74D73275E0A727D210C51893461573 /* Pods-VHLWebView.debug.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MACH_O_TYPE = staticlib;
+				MTL_ENABLE_DEBUG_INFO = YES;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PODS_ROOT = "$(SRCROOT)";
+				PRODUCT_BUNDLE_IDENTIFIER = "org.cocoapods.${PRODUCT_NAME:rfc1034identifier}";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Debug;
+		};
+		CF7953F66E785E8876EB4D370D777D50 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++0x";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGNING_REQUIRED = NO;
+				COPY_PHASE_STRIP = NO;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"POD_CONFIGURATION_DEBUG=1",
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				ONLY_ACTIVE_ARCH = YES;
+				PROVISIONING_PROFILE_SPECIFIER = NO_SIGNING/;
+				STRIP_INSTALLED_PRODUCT = NO;
+				SYMROOT = "${SRCROOT}/../build";
+			};
+			name = Debug;
+		};
+		F4D7B2D5409E6F68E51281A8B4782830 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 6174EBB3D80C40A85097F7D56B136CD2 /* JZNavigationExtension.xcconfig */;
+			buildSettings = {
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
+				"CODE_SIGN_IDENTITY[sdk=watchos*]" = "";
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_PREFIX_HEADER = "Target Support Files/JZNavigationExtension/JZNavigationExtension-prefix.pch";
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				OTHER_LDFLAGS = "";
+				OTHER_LIBTOOLFLAGS = "";
+				PRIVATE_HEADERS_FOLDER_PATH = "";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PUBLIC_HEADERS_FOLDER_PATH = "";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		2D8E8EC45A3A1A1D94AE762CB5028504 /* Build configuration list for PBXProject "Pods" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				CF7953F66E785E8876EB4D370D777D50 /* Debug */,
+				79B0C2E66EFA9917ED6EDDB8FC6A7684 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		33905E7A87686803A1F3DCE43B7CE659 /* Build configuration list for PBXNativeTarget "Pods-VHLWebView" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8A39D1FD3A9A5DF66EC0B4E7BF407B26 /* Debug */,
+				19AB58D8D1C315DD54702C923E77CC22 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		54D3B494D3F2395A76B78730C1F83EA7 /* Build configuration list for PBXNativeTarget "JZNavigationExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				24C31621297DE01492307C2B6827020F /* Debug */,
+				F4D7B2D5409E6F68E51281A8B4782830 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		ADDD598D97160FAFC23522D96D16607C /* Build configuration list for PBXNativeTarget "Aspects" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84893E102A1A1FB8FAE0E269E0B3326A /* Debug */,
+				7C316EC1C9660FBD6475B6513DE61DB0 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = D41D8CD98F00B204E9800998ECF8427E /* Project object */;
+}
