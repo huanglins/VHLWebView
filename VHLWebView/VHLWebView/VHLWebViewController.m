@@ -19,8 +19,10 @@
 #import "VHLWebViewShareView.h"
 #import "VHLWebViewChangeFontView.h"
 // route/js handle
-#import "VHLWebViewJSBridgeHandle.h"
 #import "VHLWebViewRouteHandle.h"
+#import "VHLWebViewJSBridgeHandle.h"
+#import "VHLWebViewEvaluateJSHandle.h"
+
 
 #define VHLWEB_IOS_VERSION [[[UIDevice currentDevice] systemVersion] floatValue]
 
@@ -379,6 +381,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         #pragma clang diagnostic pop
         [parametersStr appendString:[NSString stringWithFormat:@"\"%@\":\"%@\",", key, value]];
     }
+    // 去掉最后一个 ,
     parametersStr = (NSMutableString *)[parametersStr substringToIndex:parametersStr.length - 1];
     _postJScript = [NSString stringWithFormat:@"post('%@', {%@});", url, parametersStr];
     
@@ -881,6 +884,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     if (_didMakePostRequest) {
         // ** 这里因为 html里面的动画延时为0.5秒，需要等加载动画都执行后在去执行JS，不然动画不会执行**
         [self performSelector:@selector(evaluateJavaScript:) withObject:_postJScript afterDelay:0.5];
+    }
+    // 全局JS
+    {
+        [[VHLWebViewEvaluateJSHandle shareInstance] evaluateJSWebView:webView];
     }
     [self didFinishLoad];
 }

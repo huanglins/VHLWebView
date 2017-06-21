@@ -15,7 +15,7 @@
 #import "WKWebViewJavascriptBridge.h"
 
 /**
- *  处理与JS交互
+ *  JavascriptBridge - 处理与JS交互
  */
 @interface VHLWebViewJSBridgeHandle : NSObject
 

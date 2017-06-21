@@ -40,7 +40,7 @@ NS_ASSUME_NONNULL_BEGIN
 // web title
 @property (nonatomic, strong) NSString *webTitle;
 // ------------------ 可以设置的属性 ------------------
-/** 横屏后是否隐藏导航栏，默认不隐藏。需要在plist中将 View controller-based status bar appearance 设置为 YES */
+/** 横屏后是否隐藏状态栏，默认不隐藏。需要在plist中将 View controller-based status bar appearance 设置为 YES */
 @property (nonatomic, assign) BOOL hideLandscapeStatusBar;          // 横屏状态栏是否显示 |
 /** 是否显示导航栏菜单按钮，默认为不隐藏*/
 @property (nonatomic, assign) BOOL hideNavMenuBarButton;            // 导航栏菜单按钮
@@ -51,7 +51,7 @@ NS_ASSUME_NONNULL_BEGIN
 /** 导航栏按钮颜色(图片，标题)*/
 @property (nonatomic, strong) UIColor *navTitleColor;               // 导航栏按钮颜色(图片，标题)
 
-/** 是否显示网页来源lable，默认NO - 显示*/
+/** 是否隐藏网页来源lable，默认NO - 显示*/
 @property (nonatomic, assign) BOOL hideSourceLabel;                 // 网页来源lable是否显示
 /** 网页来源字体颜色，默认为浅灰色*/
 @property (nonatomic, strong) UIColor *sourceLabelColor;            // 网页来源lable字体颜色
@@ -73,7 +73,7 @@ NS_ASSUME_NONNULL_BEGIN
 - (instancetype)initWithHTMLString:(NSString *)HTMLString baseURL:(NSURL *)baseURL;
 - (instancetype)initWithRequest:(NSMutableURLRequest *)request;
 - (instancetype)initWithPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title;
-// 加载
+// 请求 url/request/post
 - (void)loadAddress:(NSString *)urlString;
 - (void)loadURL:(NSURL *)URL;
 - (void)loadHTMLString:(NSString *)HTMLString baseURL:(NSURL *)baseURL;
@@ -93,7 +93,13 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)didFailLoadWithError:(NSError *)error VHL_REQUIRES_SUPER;
 
 // JS 交互
-// - (void)
+/*
+ 根据实际情况重写
+ VHLWebViewEvaluateJSHandle
+ VHLWebViewJSBridgeHandle
+ VHLWebViewRouteHandle
+ 中的方法
+ */
 
 @end
 NS_ASSUME_NONNULL_END
