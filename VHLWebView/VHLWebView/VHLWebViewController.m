@@ -34,13 +34,6 @@
 @property (nonatomic, assign) BOOL vhl_hiddenWhenProgressApproachFullSize;
 @end
 
-@interface VHLWebViewController()
-@property (nonatomic, strong) WKNavigation *navigation;                 // 当前网页导航栏
-@property (nonatomic, strong) UIProgressView *progressView;             // 网页进度条
-
-@property (nonatomic, strong) VHLWebViewJSBridgeHandle *vhlJSBridgeHandle;
-@end
-
 @implementation UIProgressView (WebKit)
 
 + (void)load {
@@ -113,12 +106,18 @@
     
     int _webTextSizeAdjust;     // 网页字体大小(1-5，2为标准)
 }
-@property (nonatomic, strong) UIBarButtonItem *navBackBarButtonItem;    // 左边返回导航栏按钮
-@property (nonatomic, strong) UIBarButtonItem *navCloseBarButtonItem;   // 左边关闭导航栏按钮
-@property (nonatomic, strong) UIBarButtonItem *navMenuBarButtonItem;    // 右边菜单按钮
 
-@property (nonatomic, strong) UILabel *backgroundLabel;                 // 显示 - 网页有 *** 提供
-@property (nonatomic, strong) NSTimer *updating;                        // 定时器
+@property (nonatomic, strong) WKNavigation *navigation;                         // 当前网页导航栏
+@property (nonatomic, strong) UIProgressView *progressView;                     // 网页进度条
+
+@property (nonatomic, strong) VHLWebViewJSBridgeHandle *vhlJSBridgeHandle;
+
+@property (nonatomic, strong) UIBarButtonItem *navBackBarButtonItem;            // 左边返回导航栏按钮
+@property (nonatomic, strong) UIBarButtonItem *navCloseBarButtonItem;           // 左边关闭导航栏按钮
+@property (nonatomic, strong) UIBarButtonItem *navMenuBarButtonItem;            // 右边菜单按钮
+
+@property (nonatomic, strong) UILabel *backgroundLabel;                         // 显示 - 网页有 *** 提供
+@property (nonatomic, strong) NSTimer *updating;                                // 定时器
 
 @end
 
@@ -141,12 +140,13 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 
 #pragma mark - Life cycle 生命周期
 - (void)dealloc{
-    [_webView stopLoading];
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
+    [_webView stopLoading];
 
     _webView.UIDelegate = nil;
     _webView.navigationDelegate = nil;
-    [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
+    _webView.scrollView.delegate = nil;
     
     _webView = nil;
 }
@@ -207,7 +207,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     self.automaticallyAdjustsScrollViewInsets = YES;                        // 自动调整 inset
     self.extendedLayoutIncludesOpaqueBars = YES;
     
-    // self.navigationController.interactivePopGestureRecognizer.delegate = self;
     [self.navigationController.navigationBar setShadowImage:[UIImage new]];
     
     [self setupSubviews];
@@ -263,12 +262,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     
+    // 移除网页进度条
     if (self.navigationController) {
         [_progressView removeFromSuperview];
     }
-    
-    // 移除通知
-    UIDevice *device = [UIDevice currentDevice]; //Get the device object
+    // 移除屏幕旋转通知通知
+    UIDevice *device = [UIDevice currentDevice];
     [[NSNotificationCenter defaultCenter] removeObserver:self name:UIDeviceOrientationDidChangeNotification object:device];
 }
 - (void)viewDidDisappear:(BOOL)animated {
@@ -298,36 +297,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)orientationChanged:(NSNotification *)note  {
     [self updateNavigationItems];
 }
-//设置是否隐藏
+//设置是否隐藏状态栏
 - (BOOL)prefersStatusBarHidden {
     return self.hideLandscapeStatusBar;
 }
-#pragma mark - VHLPopNavigationController 注入方法  -----------------------------
-// 用于实现自定义的导航栏返回按钮点击
-- (BOOL)navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item {
-    // Should not pop. It appears clicked the back bar button item. We should decide the action according to the content of web view.
-    if ([self.navigationController.topViewController isKindOfClass:[VHLWebViewController class]]) {
-        VHLWebViewController* webVC = (VHLWebViewController*)self.navigationController.topViewController;
-        // If web view can go back.
-        if (webVC.webView.canGoBack) {
-            // Stop loading if web view is loading.
-            if (webVC.webView.isLoading) {
-                [webVC.webView stopLoading];
-            }
-            // Go back to the last page if exist.
-            [webVC.webView goBack];
-            // Should not pop items.
-            return NO;
-        }else{
-            // Pop view controlers directly.
-            return YES;
-        }
-    }else{
-        // Pop view controllers directly.
-        return YES;
-    }
-}
 #pragma mark - KVO 键值监听相关   ------------------------------------------------
+// KVO - 监听 estimatedProgress
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     // 监听网页加载进度
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
@@ -387,6 +362,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     [self loadHTMLString:_HTMLString baseURL:_baseURL];
 }
+// 执行JS
 - (void)evaluateJavaScript:(NSString *)js
 {
     [self.webView evaluateJavaScript:js completionHandler:^(id object, NSError * _Nullable error) {
@@ -403,7 +379,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         }
     }];
 }
-#pragma mark - 拼接cookie
+#pragma mark - Cookie ----------------------------------------------------------
+// Cookie -
 - (NSString *)readCurrentCookieWith:(NSDictionary*)dic{
     if (dic == nil) {
         return nil;
@@ -418,359 +395,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         return cookieString;
     }
 }
-#pragma mark - 集中处理的网页方法    ----------------------------------------------
-// 回调 - 网页将要回退
-- (void)willGoBack {
-    
-}
-// 回调 - 网页将要向前
-- (void)willGoForward {
-
-}
-// 回调 - 网页重新加载
-- (void)willReload {
-
-}
-// 回调 - 网页将要结束
-- (void)willStop {
-
-}
-// 回调 - 网页开始加载
-- (void)didStartLoad {
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    [self updateNavigationItems];
-    // 开始加载的时候，让进度条先前进一点
-    [self.progressView setProgress:0.16 animated:YES];
-    if (_didMakePostRequest) {
-        [_progressView setProgress:0.88 animated:YES];
-    }
-
-    _loading = YES;
-}
-// 回调 - 网页加载完成
-- (void)didFinishLoad {
-    @try {
-        [self hookWebContentCommitPreviewHandler];
-    } @catch (NSException *exception) {
-    } @finally {
-    }
-    _loading = NO;
-    // 网页加载转圈停止
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    // 修改导航栏按钮
-    [self updateNavigationItems];
-    // 网页背景颜色
-    {
-        //self.view.backgroundColor = _webScrollViewBGColor?:[UIColor colorWithRed:0.53 green:0.56 blue:0.62 alpha:1.00];
-        _webView.backgroundColor = _webScrollViewBGColor?:[UIColor clearColor];
-    }
-    // 网页来源显示
-    {
-        NSString *title;
-        title = [_webView title]?:@"";
-
-        if ([title isEqualToString:@""]) {
-            self.navigationItem.title = _webTitle?:@"";
-        } else {
-            self.navigationItem.title = title;
-        }
-        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-        NSString *bundle = ([infoDictionary objectForKey:@"CFBundleDisplayName"]?:[infoDictionary objectForKey:@"CFBundleName"])?:[infoDictionary objectForKey:@"CFBundleIdentifier"];
-        NSString *host;
-        host = _webView.URL.host;
-
-        _backgroundLabel.text = [NSString stringWithFormat:@"此网页由 %@ 提供", host?:bundle]; //
-    }
-    // 修改当前网页字体
-    {
-        int scaleValue = 100;
-        if (_webTextSizeAdjust == 1) {
-            scaleValue = 90;
-        } else if (_webTextSizeAdjust == 2) {
-            scaleValue = 100;
-        } else if (_webTextSizeAdjust == 3) {
-            scaleValue = 110;
-        } else if (_webTextSizeAdjust == 4) {
-            scaleValue = 120;
-        } else if (_webTextSizeAdjust == 5) {
-            scaleValue = 130;
-        }
-        NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
-    
-        [self.webView evaluateJavaScript:jsStr completionHandler:nil];
-    }
-    // 获取当前网页内容高度
-    {
-        _htmlHeight = _webView.scrollView.contentSize.height;
-    }
-}
-// 回调 - 网页请求错误
-- (void)didFailLoadWithError:(NSError *)error {
-    if (error.code == NSURLErrorCannotFindHost) {   // 404
-        [self loadURL:[NSURL fileURLWithPath:kVHL404NotFoundHTMLPath]];
-    } else if(error.code == NSURLErrorNotConnectedToInternet){
-        [self loadURL:[NSURL fileURLWithPath:kVHLNetworkErrorHTMLPath]];
-    }
-    
-    [self updateNavigationItems];
-    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
-    //[_progressView setProgress:0.9 animated:YES];
-    if (error.code == -999) {   // -999 上一页面还没加载完，就加载当下一页面，就会报这个错。
-        return;
-    } else {
-        _backgroundLabel.text = [NSString stringWithFormat:@"网页加载失败:%@",error.localizedDescription];
-        // 弹框提示
-        UIAlertController *alert = [UIAlertController alertControllerWithTitle:[error localizedDescription] message:error.userInfo[@"WKJavaScriptExceptionMessage"]?:nil preferredStyle:UIAlertControllerStyleAlert];
-        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-            [alert dismissViewControllerAnimated:YES completion:NULL];
-        }];
-        // add actions
-        [alert addAction:okAction];
-        
-        [self presentViewController:alert animated:YES completion:^{}];
-    }
-}
-#pragma mark - Actions   -------------------------------------------------------
-// 点击回退
-- (void)goBackClicked:(UIBarButtonItem *)sender {
-    [self willGoBack];
-
-    if ([_webView canGoBack]) {
-        _navigation = [_webView goBack];
-    }
-}
-// 点击向前
-- (void)goForwardClicked:(UIBarButtonItem *)sender {
-    [self willGoForward];
-    if ([_webView canGoForward]) {
-        _navigation = [_webView goForward];
-    }
-}
-// 点击重新加载
-- (void)reloadClicked:(UIBarButtonItem *)sender {
-    [self willReload];
-    
-    if ([_webView.URL.resourceSpecifier isEqualToString:kVHL404NotFoundHTMLPath] ||
-        [_webView.URL.resourceSpecifier isEqualToString:kVHLNetworkErrorHTMLPath])
-    {
-        [self loadURL:_URL];
-    } else {
-        _navigation = [_webView reload];
-    }
-}
-// 点击停止网页加载
-- (void)stopClicked:(UIBarButtonItem *)sender {
-    [self willStop];
-    [_webView stopLoading];
-}
-#pragma mark - 导航栏相关的点击方法 -----------------------------------------------
-// 导航栏返回按钮点击
-- (void)navigationItemHandleBack:(UIBarButtonItem *)sender {
-    if ([_webView canGoBack]) {
-        _navigation = [_webView goBack];
-        return;
-    }
-    // 模态跳转和导航栏跳转
-    if (self.navigationController && [self.navigationController respondsToSelector:@selector(popViewControllerAnimated:)]) {
-        [self.navigationController popViewControllerAnimated:YES];
-    } else if ([self respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-}
-// 导航栏关闭按钮点击
-- (void)navigationIemHandleClose:(UIBarButtonItem *)sender {
-    // 模态跳转和导航栏跳转
-    if (self.navigationController && [self.navigationController respondsToSelector:@selector(popViewControllerAnimated:)]) {
-        [self.navigationController popViewControllerAnimated:YES];
-    } else if ([self respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
-        [self dismissViewControllerAnimated:YES completion:nil];
-    }
-}
-// 导航栏关闭按钮点击,模态跳转时
-- (void)doneButtonClicked:(id)sender {
-    [self dismissViewControllerAnimated:YES completion:NULL];
-}
-// 导航栏菜单按钮点击，分享
-- (void)navigationMenuButtonClicked {
-    // 取消当前编辑
-    [self.webView endEditing:YES];
-    // 1.
-    VHLWebViewShareItem *item0 = [VHLWebViewShareItem itemWithTitle:@"微信"
-                                                               icon:@"vhl_webview_share_weixin"
-                                                            handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-
-                                                                msg.desc = @"";
-                                                                
-                                                                msg.image=[UIImage new];
-                                                                msg.multimediaType=OSMultimediaTypeNews;
-                                                                
-                                                                [OpenShare shareToWeixinSession:msg Success:^(OSMessage *message) {
-                                                                    NSLog(@"微信分享到会话成功：\n%@",message);
-                                                                } Fail:^(OSMessage *message, NSError *error) {
-                                                                    NSLog(@"微信分享到会话失败：\n%@\n%@",error,message);
-                                                                }];
-                                                            }];
-    VHLWebViewShareItem *item1 = [VHLWebViewShareItem itemWithTitle:@"朋友圈"
-                                                               icon:@"vhl_webview_share_timeline"
-                                                            handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-
-                                                                msg.desc = @"";
-                                                                msg.image = [UIImage new];
-                                                                msg.multimediaType=OSMultimediaTypeNews;
-                                                                
-                                                                [OpenShare shareToWeixinTimeline:msg Success:^(OSMessage *message) {
-                                                                    NSLog(@"微信分享到会话成功：\n%@",message);
-                                                                } Fail:^(OSMessage *message, NSError *error) {
-                                                                    NSLog(@"微信分享到会话失败：\n%@\n%@",error,message);
-                                                                }];
-                                                            }];
-    VHLWebViewShareItem *item2 = [VHLWebViewShareItem itemWithTitle:@"QQ"
-                                                               icon:@"vhl_webview_share_qq"
-                                                            handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-
-                                                                msg.desc = @"";
-                                                                UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
-                                                                msg.image=image;
-                                                                msg.thumbnail = image;
-                                                                
-                                                                [OpenShare shareToQQFriends:msg Success:^(OSMessage *message) {
-                                                                    NSLog(@"QQ分享到会话成功：\n%@",message);
-                                                                } Fail:^(OSMessage *message, NSError *error) {
-                                                                    
-                                                                }];
-                                                            }];
-    VHLWebViewShareItem *item3 = [VHLWebViewShareItem itemWithTitle:@"QQ空间"
-                                                               icon:@"vhl_webview_share_qzone"
-                                                            handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-
-                                                                msg.desc = @"";
-                                                                UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
-                                                                msg.image=image;
-                                                                msg.thumbnail = image;
-                                                                
-                                                                [OpenShare shareToQQZone:msg Success:^(OSMessage *message) {
-                                                                    NSLog(@"QQ分享到会话成功：\n%@",message);
-                                                                } Fail:^(OSMessage *message, NSError *error) {
-                                                                    NSLog(@"QQ分享到会话失败：\n%@\n%@",error,message);
-                                                                }];
-                                                            }];
-    VHLWebViewShareItem *item4 = [VHLWebViewShareItem itemWithTitle:@"邮件"
-                                                               icon:@"vhl_webview_share_email"
-                                                            handler:^{
-                                                                MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
-                                                                mailViewController.mailComposeDelegate = self;
-                                                                    [mailViewController setSubject:[self.webView title]];
-                                                                    if ([self.webView.URL.scheme isEqualToString:@"file"]) {
-                                                                        [mailViewController setMessageBody:self.URL.absoluteString isHTML:NO];
-                                                                    } else {
-                                                                        [mailViewController setMessageBody:self.webView.URL.absoluteString isHTML:NO];
-                                                                    }
-
-                                                                mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
-                                                                
-                                                                [self presentViewController:mailViewController animated:YES completion:nil];
-                                                            }];
-    VHLWebViewShareItem *item5 = [VHLWebViewShareItem itemWithTitle:@"在Safari中打开"
-                                                               icon:@"vhl_webview_share_safari"
-                                                            handler:^{
-                                                                [[UIApplication sharedApplication] openURL:_URL];
-                                                            }];
-    // 2. 功能按钮 [复制链接，修改字体，刷新]
-    VHLWebViewShareItem *item11 = [VHLWebViewShareItem itemWithTitle:@"复制链接"
-                                               icon:@"vhl_webview_action_copylink"
-                                            handler:^{
-                                                UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
-                                                
-                                                if ([self.webView.URL.scheme isEqualToString:@"file"]) {
-                                                    pasteboard.string = self.URL.absoluteString?:@"www.vincents.cn";
-                                                } else {
-                                                    pasteboard.string = self.webView.URL.absoluteString?:@"www.vincents.cn";
-                                                }
-                                                // 弹出提示
-                                                UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接已经复制" message:nil preferredStyle:UIAlertControllerStyleAlert];
-                                                [self presentViewController:alert animated:YES completion:^{
-                                                    dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC));
-                                                    dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
-                                                        [alert dismissViewControllerAnimated:YES completion:nil];
-                                                    });
-                                                }];
-                                            }];
-    VHLWebViewShareItem *item12 = [VHLWebViewShareItem itemWithTitle:@"字体"
-                                                                icon:@"vhl_webview_action_font"
-                                                             handler:^{
-                                                                  [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
-                                                                 VHLWebViewChangeFontView *changeFontView = [[VHLWebViewChangeFontView alloc] init];
-                                                                 [changeFontView setSliderValue:_webTextSizeAdjust];
-                                                                 [changeFontView show];
-                                                                 [changeFontView changeSize:^(CGFloat stepValue) {
-                                                                     // 保存
-                                                                     _webTextSizeAdjust = stepValue;
-                                                                     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
-                                                                     [userDefaults setInteger:_webTextSizeAdjust forKey:kVHLWebTextSizeAdjustUD];
-                                                                     [userDefaults synchronize];
-                                                                     //
-                                                                     int scaleValue = 100;
-                                                                     if (_webTextSizeAdjust == 1) {
-                                                                         scaleValue = 90;
-                                                                     } else if (_webTextSizeAdjust == 2) {
-                                                                         scaleValue = 100;
-                                                                     } else if (_webTextSizeAdjust == 3) {
-                                                                         scaleValue = 110;
-                                                                     } else if (_webTextSizeAdjust == 4) {
-                                                                         scaleValue = 120;
-                                                                     } else if (_webTextSizeAdjust == 5) {
-                                                                         scaleValue = 130;
-                                                                     }
-                                                                     
-                                                                     NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
-                                                                    #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
-                                                                     
-                                                                    [self.webView evaluateJavaScript:jsStr completionHandler:nil];
-                                                                    #else
-                                                                     [self.webView stringByEvaluatingJavaScriptFromString:jsStr];
-                                                                    #endif
-                                                                 }];
-                                                             }];
-    VHLWebViewShareItem *item13 = [VHLWebViewShareItem itemWithTitle:@"刷新"
-                                                               icon:@"vhl_webview_action_refresh"
-                                                            handler:^{
-                                                                [self reloadClicked:nil];
-                                                            }];
-    NSArray *shareItemsArray = @[item0,item1,item2,item3,item4,item5];
-    if (!_URL) {        // 如果没有URL，那么就不显示 [在Safari打开]
-        shareItemsArray = @[item0,item1,item2,item3,item4];
-    }
-    NSArray *functionItemsArray = @[item11,item12,item13];
-    //
-    VHLWebViewShareView *shareView = [VHLWebViewShareView shareViewWithShareItems:shareItemsArray funcationItems:functionItemsArray];
-    shareView.titleLabel.text = self.backgroundLabel.text;
-    [shareView show];
-}
-#pragma mark - ALL Delegate -------------------------------- **** --------------------------------
-#pragma mark MFMailComposeViewControllerDelegate   --- 发送邮件的代理
-- (void)mailComposeController:(MFMailComposeViewController *)controller
-          didFinishWithResult:(MFMailComposeResult)result
-                        error:(NSError *)error
-{
-    [self dismissViewControllerAnimated:YES completion:nil];
-}
+#pragma mark - ALL Delegate ----------------------------------------------------
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
 #pragma mark - WKUIDelegate
-// WKUI - Delegate - 0.创建一个webview
+// WKUI - Delegate - 0. 创建一个webview
 - (WKWebView *)webView:(WKWebView *)webView createWebViewWithConfiguration:(WKWebViewConfiguration *)configuration forNavigationAction:(WKNavigationAction *)navigationAction windowFeatures:(WKWindowFeatures *)windowFeatures {
     WKFrameInfo *frameInfo = navigationAction.targetFrame;
     if (![frameInfo isMainFrame]) {
@@ -781,10 +409,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     return nil;
 }
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
-// WKUI - Delegate - 1.网页已经关闭
+// WKUI - Delegate - 1. 网页已经关闭
 - (void)webViewDidClose:(WKWebView *)webView {
 }
-// WKUI - Delegate - 1.网页将要关闭，网页内容将要被终止
+// WKUI - Delegate - 1. 网页将要关闭，网页内容将要被终止
 - (void)webViewWebContentProcessDidTerminate:(WKWebView *)webView {
     [webView reload];
     // Get the host name.
@@ -912,11 +540,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         decisionHandler(WKNavigationActionPolicyCancel);
         return;
     }
-    
-    // URL actions
+    // URL actions  404/网络连接错误页面
     if ([navigationAction.request.URL.absoluteString hasSuffix:kVHL404NotFoundURLKey] || [navigationAction.request.URL.absoluteString hasSuffix:kVHLNetworkErrorURLKey]) {
         [self loadURL:_URL];
     }
+    
     [self updateNavigationItems];
     decisionHandler(WKNavigationActionPolicyAllow);
 }
@@ -929,18 +557,149 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // WKWebView 通过侧滑手势返回了一个页面
     [self updateNavigationItems];
 }
-// WK - Delegate - 3.处理认证和代理
+// WK - Delegate - 3.处理认证和代理 HTTPS
 - (void)webView:(WKWebView *)webView didReceiveAuthenticationChallenge:(NSURLAuthenticationChallenge *)challenge completionHandler:(void (^)(NSURLSessionAuthChallengeDisposition, NSURLCredential * _Nullable))completionHandler{
-    completionHandler(NSURLSessionAuthChallengePerformDefaultHandling, nil);
+    if ([challenge.protectionSpace.authenticationMethod isEqualToString:NSURLAuthenticationMethodServerTrust]) {
+        if ([challenge previousFailureCount] == 0) {
+            NSURLCredential *credential = [NSURLCredential credentialForTrust:challenge.protectionSpace.serverTrust];
+            completionHandler(NSURLSessionAuthChallengeUseCredential, credential);
+        } else {
+            completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+        }
+    } else {
+        completionHandler(NSURLSessionAuthChallengeCancelAuthenticationChallenge, nil);
+    }
 }
 #endif
 #pragma mark - UIScrollViewDelegate
+// UIScrollView -
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
     scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
 }
-#pragma mark - Getters  ------------------------------------------------------------------------------------------------------
+#pragma mark MFMailComposeViewControllerDelegate   --- 发送邮件的代理
+// Mail - 发送邮件
+- (void)mailComposeController:(MFMailComposeViewController *)controller
+          didFinishWithResult:(MFMailComposeResult)result
+                        error:(NSError *)error
+{
+    [self dismissViewControllerAnimated:YES completion:nil];
+}
+#pragma mark - 集中处理的网页方法    ----------------------------------------------
+// 回调 - 网页将要回退
+- (void)willGoBack {
+    
+}
+// 回调 - 网页将要向前
+- (void)willGoForward {
+    
+}
+// 回调 - 网页重新加载
+- (void)willReload {
+    
+}
+// 回调 - 网页将要结束
+- (void)willStop {
+    
+}
+// 回调 - 网页开始加载
+- (void)didStartLoad {
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    [self updateNavigationItems];
+    // 开始加载的时候，让进度条先前进一点
+    [self.progressView setProgress:0.16 animated:YES];
+    if (_didMakePostRequest) {
+        [_progressView setProgress:0.88 animated:YES];
+    }
+    
+    _loading = YES;
+}
+// 回调 - 网页加载完成
+- (void)didFinishLoad {
+    @try {
+        [self hookWebContentCommitPreviewHandler];
+    } @catch (NSException *exception) {
+    } @finally {
+    }
+    _loading = NO;
+    // 网页加载转圈停止
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
+    // 修改导航栏按钮
+    [self updateNavigationItems];
+    // 网页背景颜色
+    {
+        //self.view.backgroundColor = _webScrollViewBGColor?:[UIColor colorWithRed:0.53 green:0.56 blue:0.62 alpha:1.00];
+        _webView.backgroundColor = _webScrollViewBGColor?:[UIColor clearColor];
+    }
+    // 网页来源显示
+    {
+        NSString *title;
+        title = [_webView title]?:@"";
+        
+        if ([title isEqualToString:@""]) {
+            self.navigationItem.title = _webTitle?:@"";
+        } else {
+            self.navigationItem.title = title;
+        }
+        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+        NSString *bundle = ([infoDictionary objectForKey:@"CFBundleDisplayName"]?:[infoDictionary objectForKey:@"CFBundleName"])?:[infoDictionary objectForKey:@"CFBundleIdentifier"];
+        NSString *host;
+        host = _webView.URL.host;
+        
+        _backgroundLabel.text = [NSString stringWithFormat:@"此网页由 %@ 提供", host?:bundle]; //
+    }
+    // 修改当前网页字体
+    {
+        int scaleValue = 100;
+        if (_webTextSizeAdjust == 1) {
+            scaleValue = 90;
+        } else if (_webTextSizeAdjust == 2) {
+            scaleValue = 100;
+        } else if (_webTextSizeAdjust == 3) {
+            scaleValue = 110;
+        } else if (_webTextSizeAdjust == 4) {
+            scaleValue = 120;
+        } else if (_webTextSizeAdjust == 5) {
+            scaleValue = 130;
+        }
+        NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
+        
+        [self.webView evaluateJavaScript:jsStr completionHandler:nil];
+    }
+    // 获取当前网页内容高度
+    {
+        _htmlHeight = _webView.scrollView.contentSize.height;
+    }
+}
+// 回调 - 网页请求错误
+- (void)didFailLoadWithError:(NSError *)error {
+    if (error.code == NSURLErrorCannotFindHost) {   // 404
+        [self loadURL:[NSURL fileURLWithPath:kVHL404NotFoundHTMLPath]];
+    } else if(error.code == NSURLErrorNotConnectedToInternet){
+        [self loadURL:[NSURL fileURLWithPath:kVHLNetworkErrorHTMLPath]];
+    }
+    
+    [self updateNavigationItems];
+    [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:YES];
+    //[_progressView setProgress:0.9 animated:YES];
+    if (error.code == -999) {   // -999 上一页面还没加载完，就加载当下一页面，就会报这个错。
+        return;
+    } else {
+        _backgroundLabel.text = [NSString stringWithFormat:@"网页加载失败:%@",error.localizedDescription];
+        // 弹框提示
+        UIAlertController *alert = [UIAlertController alertControllerWithTitle:[error localizedDescription] message:error.userInfo[@"WKJavaScriptExceptionMessage"]?:nil preferredStyle:UIAlertControllerStyleAlert];
+        UIAlertAction *okAction = [UIAlertAction actionWithTitle:@"确定" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
+            [alert dismissViewControllerAnimated:YES completion:NULL];
+        }];
+        // add actions
+        [alert addAction:okAction];
+        
+        [self presentViewController:alert animated:YES completion:^{}];
+    }
+}
+#pragma mark - Getters  --------------------------------------------------------
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+// GET - WKWebview
 - (WKWebView *)webview {
     if (_webView) return _webView;
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
@@ -993,6 +752,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     return _webView;
 }
+// GET - progressView
 - (UIProgressView *)progressView {
     if (_progressView) return _progressView;
     CGFloat progressBarHeight = 2.0f;
@@ -1005,8 +765,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     return _progressView;
 }
 #endif
-
-// 网页由 ** 提供
+// GET - 网页由 ** 提供 Lable
 - (UILabel *)backgroundLabel {
     if (_backgroundLabel) return _backgroundLabel;
     _backgroundLabel = [[UILabel alloc] initWithFrame:CGRectZero];
@@ -1019,7 +778,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [_backgroundLabel setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
     return _backgroundLabel;
 }
-// 导航栏 [返回] 按钮
+// GET - 导航栏 [返回] 按钮
 - (UIBarButtonItem *)navBackBarButtonItem {
     if (_navBackBarButtonItem) return _navBackBarButtonItem;
     // UIImageRenderingModeAlwaysTemplate 模式，图片根据 tint color
@@ -1078,7 +837,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     return _navBackBarButtonItem;
 }
-// 导航栏 [关闭] 按钮
+// GET - 导航栏 [关闭] 按钮
 - (UIBarButtonItem *)navCloseBarButtonItem{
     if (_navCloseBarButtonItem) return _navCloseBarButtonItem;
     if (self.navigationItem.rightBarButtonItem == _doneItem && self.navigationItem.rightBarButtonItem != nil) {
@@ -1106,7 +865,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
     return _navCloseBarButtonItem;
 }
-// 导航栏 [菜单] 按钮
+// GET - 导航栏 [菜单] 按钮
 - (UIBarButtonItem *)navMenuBarButtonItem {
     if (_navMenuBarButtonItem) return _navMenuBarButtonItem;
     
@@ -1155,7 +914,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     return _navMenuBarButtonItem;
 }
-//
+// GET - 初始化所有UI
 - (void)setupSubviews {
     id topLayoutGuide    = self.topLayoutGuide;
     id bottomLayoutGuide = self.bottomLayoutGuide;
@@ -1190,8 +949,244 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [self.vhlJSBridgeHandle jsSystemHanlde];
     [self.vhlJSBridgeHandle jsCustomHandle];
 }
-#pragma mark - Helper ------------------------------------------------------------------------------------------------------
-// 修改导航栏按钮样式
+#pragma mark - Actions ---------------------------------------------------------
+// 点击回退
+- (void)goBackClicked:(UIBarButtonItem *)sender {
+    [self willGoBack];
+    
+    if ([_webView canGoBack]) {
+        _navigation = [_webView goBack];
+    }
+}
+// 点击向前
+- (void)goForwardClicked:(UIBarButtonItem *)sender {
+    [self willGoForward];
+    if ([_webView canGoForward]) {
+        _navigation = [_webView goForward];
+    }
+}
+// 点击重新加载
+- (void)reloadClicked:(UIBarButtonItem *)sender {
+    [self willReload];
+    
+    if ([_webView.URL.resourceSpecifier isEqualToString:kVHL404NotFoundHTMLPath] ||
+        [_webView.URL.resourceSpecifier isEqualToString:kVHLNetworkErrorHTMLPath])
+    {
+        [self loadURL:_URL];
+    } else {
+        _navigation = [_webView reload];
+    }
+}
+// 点击停止网页加载
+- (void)stopClicked:(UIBarButtonItem *)sender {
+    [self willStop];
+    [_webView stopLoading];
+}
+// 导航栏返回按钮点击
+- (void)navigationItemHandleBack:(UIBarButtonItem *)sender {
+    if ([_webView canGoBack]) {
+        _navigation = [_webView goBack];
+        // 往上返回到第一张页面的时候开启手势侧滑
+        if (![_webView canGoBack]) {
+            self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+        }
+        return;
+    }
+    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+    // 模态跳转和导航栏跳转
+    if (self.navigationController && [self.navigationController respondsToSelector:@selector(popViewControllerAnimated:)]) {
+        [self.navigationController popViewControllerAnimated:YES];
+    } else if ([self respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+// 导航栏关闭按钮点击
+- (void)navigationIemHandleClose:(UIBarButtonItem *)sender {
+    // 导航栏侧滑手势启用
+    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+    // 模态跳转和导航栏跳转
+    if (self.navigationController && [self.navigationController respondsToSelector:@selector(popViewControllerAnimated:)]) {
+        [self.navigationController popViewControllerAnimated:YES];
+    } else if ([self respondsToSelector:@selector(dismissViewControllerAnimated:completion:)]) {
+        [self dismissViewControllerAnimated:YES completion:nil];
+    }
+}
+// 导航栏关闭按钮点击,模态跳转时
+- (void)doneButtonClicked:(id)sender {
+    [self dismissViewControllerAnimated:YES completion:NULL];
+}
+// 导航栏菜单按钮点击，分享
+- (void)navigationMenuButtonClicked {
+    // 取消当前编辑
+    [self.webView endEditing:YES];
+    // 1.
+    VHLWebViewShareItem *item0 = [VHLWebViewShareItem itemWithTitle:@"微信"
+                                                               icon:@"vhl_webview_share_weixin"
+                                                            handler:^{
+                                                                OSMessage *msg=[[OSMessage alloc] init];
+                                                                
+                                                                msg.title = self.webView.title;
+                                                                msg.link=self.webView.URL.absoluteString;
+                                                                
+                                                                msg.desc = @"";
+                                                                
+                                                                msg.image=[UIImage new];
+                                                                msg.multimediaType=OSMultimediaTypeNews;
+                                                                
+                                                                [OpenShare shareToWeixinSession:msg Success:^(OSMessage *message) {
+                                                                    NSLog(@"微信分享到会话成功：\n%@",message);
+                                                                } Fail:^(OSMessage *message, NSError *error) {
+                                                                    NSLog(@"微信分享到会话失败：\n%@\n%@",error,message);
+                                                                }];
+                                                            }];
+    VHLWebViewShareItem *item1 = [VHLWebViewShareItem itemWithTitle:@"朋友圈"
+                                                               icon:@"vhl_webview_share_timeline"
+                                                            handler:^{
+                                                                OSMessage *msg=[[OSMessage alloc] init];
+                                                                msg.title = self.webView.title;
+                                                                msg.link=self.webView.URL.absoluteString;
+                                                                
+                                                                msg.desc = @"";
+                                                                msg.image = [UIImage new];
+                                                                msg.multimediaType=OSMultimediaTypeNews;
+                                                                
+                                                                [OpenShare shareToWeixinTimeline:msg Success:^(OSMessage *message) {
+                                                                    NSLog(@"微信分享到会话成功：\n%@",message);
+                                                                } Fail:^(OSMessage *message, NSError *error) {
+                                                                    NSLog(@"微信分享到会话失败：\n%@\n%@",error,message);
+                                                                }];
+                                                            }];
+    VHLWebViewShareItem *item2 = [VHLWebViewShareItem itemWithTitle:@"QQ"
+                                                               icon:@"vhl_webview_share_qq"
+                                                            handler:^{
+                                                                OSMessage *msg=[[OSMessage alloc] init];
+                                                                msg.title = self.webView.title;
+                                                                msg.link=self.webView.URL.absoluteString;
+                                                                
+                                                                msg.desc = @"";
+                                                                UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
+                                                                msg.image=image;
+                                                                msg.thumbnail = image;
+                                                                
+                                                                [OpenShare shareToQQFriends:msg Success:^(OSMessage *message) {
+                                                                    NSLog(@"QQ分享到会话成功：\n%@",message);
+                                                                } Fail:^(OSMessage *message, NSError *error) {
+                                                                    
+                                                                }];
+                                                            }];
+    VHLWebViewShareItem *item3 = [VHLWebViewShareItem itemWithTitle:@"QQ空间"
+                                                               icon:@"vhl_webview_share_qzone"
+                                                            handler:^{
+                                                                OSMessage *msg=[[OSMessage alloc] init];
+                                                                
+                                                                msg.title = self.webView.title;
+                                                                msg.link=self.webView.URL.absoluteString;
+                                                                
+                                                                msg.desc = @"";
+                                                                UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
+                                                                msg.image=image;
+                                                                msg.thumbnail = image;
+                                                                
+                                                                [OpenShare shareToQQZone:msg Success:^(OSMessage *message) {
+                                                                    NSLog(@"QQ分享到会话成功：\n%@",message);
+                                                                } Fail:^(OSMessage *message, NSError *error) {
+                                                                    NSLog(@"QQ分享到会话失败：\n%@\n%@",error,message);
+                                                                }];
+                                                            }];
+    VHLWebViewShareItem *item4 = [VHLWebViewShareItem itemWithTitle:@"邮件"
+                                                               icon:@"vhl_webview_share_email"
+                                                            handler:^{
+                                                                MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
+                                                                mailViewController.mailComposeDelegate = self;
+                                                                [mailViewController setSubject:[self.webView title]];
+                                                                if ([self.webView.URL.scheme isEqualToString:@"file"]) {
+                                                                    [mailViewController setMessageBody:self.URL.absoluteString isHTML:NO];
+                                                                } else {
+                                                                    [mailViewController setMessageBody:self.webView.URL.absoluteString isHTML:NO];
+                                                                }
+                                                                
+                                                                mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
+                                                                
+                                                                [self presentViewController:mailViewController animated:YES completion:nil];
+                                                            }];
+    VHLWebViewShareItem *item5 = [VHLWebViewShareItem itemWithTitle:@"在Safari中打开"
+                                                               icon:@"vhl_webview_share_safari"
+                                                            handler:^{
+                                                                [[UIApplication sharedApplication] openURL:_URL];
+                                                            }];
+    // 2. 功能按钮 [复制链接，修改字体，刷新]
+    VHLWebViewShareItem *item11 = [VHLWebViewShareItem itemWithTitle:@"复制链接"
+                                                                icon:@"vhl_webview_action_copylink"
+                                                             handler:^{
+                                                                 UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                                                                 
+                                                                 if ([self.webView.URL.scheme isEqualToString:@"file"]) {
+                                                                     pasteboard.string = self.URL.absoluteString?:@"www.vincents.cn";
+                                                                 } else {
+                                                                     pasteboard.string = self.webView.URL.absoluteString?:@"www.vincents.cn";
+                                                                 }
+                                                                 // 弹出提示
+                                                                 UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接已经复制" message:nil preferredStyle:UIAlertControllerStyleAlert];
+                                                                 [self presentViewController:alert animated:YES completion:^{
+                                                                     dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC));
+                                                                     dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                                                                         [alert dismissViewControllerAnimated:YES completion:nil];
+                                                                     });
+                                                                 }];
+                                                             }];
+    VHLWebViewShareItem *item12 = [VHLWebViewShareItem itemWithTitle:@"字体"
+                                                                icon:@"vhl_webview_action_font"
+                                                             handler:^{
+                                                                 [UIApplication sharedApplication].networkActivityIndicatorVisible = NO;
+                                                                 VHLWebViewChangeFontView *changeFontView = [[VHLWebViewChangeFontView alloc] init];
+                                                                 [changeFontView setSliderValue:_webTextSizeAdjust];
+                                                                 [changeFontView show];
+                                                                 [changeFontView changeSize:^(CGFloat stepValue) {
+                                                                     // 保存
+                                                                     _webTextSizeAdjust = stepValue;
+                                                                     NSUserDefaults *userDefaults = [NSUserDefaults standardUserDefaults];
+                                                                     [userDefaults setInteger:_webTextSizeAdjust forKey:kVHLWebTextSizeAdjustUD];
+                                                                     [userDefaults synchronize];
+                                                                     //
+                                                                     int scaleValue = 100;
+                                                                     if (_webTextSizeAdjust == 1) {
+                                                                         scaleValue = 90;
+                                                                     } else if (_webTextSizeAdjust == 2) {
+                                                                         scaleValue = 100;
+                                                                     } else if (_webTextSizeAdjust == 3) {
+                                                                         scaleValue = 110;
+                                                                     } else if (_webTextSizeAdjust == 4) {
+                                                                         scaleValue = 120;
+                                                                     } else if (_webTextSizeAdjust == 5) {
+                                                                         scaleValue = 130;
+                                                                     }
+                                                                     
+                                                                     NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+                                                                     
+                                                                     [self.webView evaluateJavaScript:jsStr completionHandler:nil];
+#else
+                                                                     [self.webView stringByEvaluatingJavaScriptFromString:jsStr];
+#endif
+                                                                 }];
+                                                             }];
+    VHLWebViewShareItem *item13 = [VHLWebViewShareItem itemWithTitle:@"刷新"
+                                                                icon:@"vhl_webview_action_refresh"
+                                                             handler:^{
+                                                                 [self reloadClicked:nil];
+                                                             }];
+    NSArray *shareItemsArray = @[item0,item1,item2,item3,item4,item5];
+    if (!_URL) {        // 如果没有URL，那么就不显示 [在Safari打开]
+        shareItemsArray = @[item0,item1,item2,item3,item4];
+    }
+    NSArray *functionItemsArray = @[item11,item12,item13];
+    //
+    VHLWebViewShareView *shareView = [VHLWebViewShareView shareViewWithShareItems:shareItemsArray funcationItems:functionItemsArray];
+    shareView.titleLabel.text = self.backgroundLabel.text;
+    [shareView show];
+}
+#pragma mark - Helper ----------------------------------------------------------
+// Helper - 修改导航栏按钮样式
 - (void)updateNavigationItems {
     [self.navigationItem setLeftBarButtonItem:nil animated:NO];
     UIBarButtonItem *spaceButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
@@ -1218,13 +1213,14 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // 解决自定义 backBarButtonItem 后侧滑手势不可使用问题
     //self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
 }
-// 修改进度条
+// Helper - 修改进度条
 - (void)updateFrameOfProgressView {
     CGFloat progressBarHeight = 2.0f;
     CGRect navigationBarBounds = self.navigationController.navigationBar.bounds;
     CGRect barFrame = CGRectMake(0, navigationBarBounds.size.height - progressBarHeight, navigationBarBounds.size.width, progressBarHeight);
     _progressView.frame = barFrame;
 }
+// Helper - 默认进度修改
 - (void)updatingProgress:(NSTimer *)sender {
     if (!_loading) {
         if (_progressView.progress >= 1.0) {
@@ -1241,7 +1237,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         }
     }
 }
-
+#pragma mark - Hook ------------------------------------------------------------
+// Hook - webContentCommit
 - (void)hookWebContentCommitPreviewHandler {
     // Find the `WKContentView` in the webview.
     __weak typeof(self) wself = self;
@@ -1277,47 +1274,30 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                     NSURL *_url = object_getIvar(_lookupItem, class_getInstanceVariable([_lookupItem class], "_url"));
                     [wself loadURL:_url];
                 } error:NULL];
-                /*
-                 UIWindow
-                 -UITransitionView
-                 --UIVisualEffectView
-                 ---_UIVisualEffectContentView
-                 ----UIView
-                 -----_UIPreviewActionSheetView
-                 */
-                /*
-                 for (UIView * transitionView in [UIApplication sharedApplication].keyWindow.subviews) {
-                 if ([transitionView isMemberOfClass:NSClassFromString(@"UITransitionView")]) {
-                 transitionView.tintColor = wself.navigationController.navigationBar.tintColor;
-                 for (UIView *__view in transitionView.subviews) {
-                 if ([__view isMemberOfClass:NSClassFromString(@"UIVisualEffectView")]) {
-                 for (UIView *___view in __view.subviews) {
-                 if ([___view isMemberOfClass:NSClassFromString(@"_UIVisualEffectContentView")]) {
-                 for (UIView *____view in ___view.subviews) {
-                 if ([____view isMemberOfClass:NSClassFromString(@"UIView")]) {
-                 __weak typeof(____view) w____view = ____view;
-                 [____view aspect_hookSelector:@selector(addSubview:) withOptions:AspectPositionAfter usingBlock:^() {
-                 for (UIView *actionSheet in w____view.subviews) {
-                 if ([actionSheet isMemberOfClass:NSClassFromString(@"_UIPreviewActionSheetView")]) {
-                 break;
-                 }
-                 }
-                 } error:NULL];
-                 }
-                 }break;
-                 }
-                 }break;
-                 }
-                 }break;
-                 }
-                 }
-                 */
             } error:NULL];
             break;
         }
     }
 }
-/* ** 系统相关事件 ** */
+// Hook - 用于实现自定义的导航栏返回按钮点击
+- (BOOL)navigationBar:(UINavigationBar *)navigationBar shouldPopItem:(UINavigationItem *)item {
+    if ([self.navigationController.topViewController isKindOfClass:[VHLWebViewController class]]) {
+        VHLWebViewController* webVC = (VHLWebViewController*)self.navigationController.topViewController;
+        if (webVC.webView.canGoBack) {
+            if (webVC.webView.isLoading) {
+                [webVC.webView stopLoading];
+            }
+            [webVC.webView goBack];
+            return NO;
+        }else{
+            return YES;
+        }
+    }else{
+        return YES;
+    }
+}
+#pragma mark - 系统事件 ----------------------------------------------------------
+// System - 系统相关事件
 - (void) motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
 {
     if (motion == UIEventSubtypeMotionShake) {          // 摇一摇

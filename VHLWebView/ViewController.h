@@ -10,8 +10,8 @@
 
 @interface ViewController : UIViewController
 
-
 - (IBAction)goWebView:(id)sender;
+- (IBAction)goUIWebview:(id)sender;
 - (IBAction)goVC:(id)sender;
 
 @end

@@ -53,7 +53,6 @@
 		BF085DF21EFA495700C935CA /* VHLWebViewShareSpaceView.m in Sources */ = {isa = PBXBuildFile; fileRef = BF085DC41EFA495700C935CA /* VHLWebViewShareSpaceView.m */; };
 		BF085DF31EFA495700C935CA /* VHLWebViewShareView.m in Sources */ = {isa = PBXBuildFile; fileRef = BF085DC61EFA495700C935CA /* VHLWebViewShareView.m */; };
 		BF4971891EE7AC3100EB868E /* post_data in Resources */ = {isa = PBXBuildFile; fileRef = BF4971881EE7AC3100EB868E /* post_data */; };
-		BF49718B1EE7C74C00EB868E /* wkwebview_post.html in Resources */ = {isa = PBXBuildFile; fileRef = BF49718A1EE7C74C00EB868E /* wkwebview_post.html */; };
 		BF700B441D6D67F20028F3D8 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = BF700B431D6D67F20028F3D8 /* main.m */; };
 		BF700B471D6D67F20028F3D8 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = BF700B461D6D67F20028F3D8 /* AppDelegate.m */; };
 		BF700B4A1D6D67F20028F3D8 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF700B491D6D67F20028F3D8 /* ViewController.m */; };
@@ -143,7 +142,6 @@
 		BF085DC61EFA495700C935CA /* VHLWebViewShareView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLWebViewShareView.m; sourceTree = "<group>"; };
 		BF085DC71EFA495700C935CA /* VHLWebViewShareViewDefine.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLWebViewShareViewDefine.h; sourceTree = "<group>"; };
 		BF4971881EE7AC3100EB868E /* post_data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = post_data; sourceTree = "<group>"; };
-		BF49718A1EE7C74C00EB868E /* wkwebview_post.html */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.html; path = wkwebview_post.html; sourceTree = "<group>"; };
 		BF700B3F1D6D67F20028F3D8 /* VHLWebView.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VHLWebView.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF700B431D6D67F20028F3D8 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		BF700B451D6D67F20028F3D8 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
@@ -361,7 +359,6 @@
 				BF085D7E1EFA495700C935CA /* VHLWebView */,
 				BF700B481D6D67F20028F3D8 /* ViewController.h */,
 				BF700B491D6D67F20028F3D8 /* ViewController.m */,
-				BF49718A1EE7C74C00EB868E /* wkwebview_post.html */,
 				BF4971881EE7AC3100EB868E /* post_data */,
 				BF8B05BD1ED922EF008FAEDD /* TowViewController.h */,
 				BF8B05BE1ED922EF008FAEDD /* TowViewController.m */,
@@ -511,7 +508,6 @@
 				BF085DE21EFA495700C935CA /* vhl_webview_share_email@3x.png in Resources */,
 				BF700B4D1D6D67F20028F3D8 /* Main.storyboard in Resources */,
 				BF085DDE1EFA495700C935CA /* vhl_webview_action_font@3x.png in Resources */,
-				BF49718B1EE7C74C00EB868E /* wkwebview_post.html in Resources */,
 				BF085DE51EFA495700C935CA /* vhl_webview_share_qq@2x.png in Resources */,
 				BF085DDC1EFA495700C935CA /* vhl_webview_action_copylink@3x.png in Resources */,
 			);
