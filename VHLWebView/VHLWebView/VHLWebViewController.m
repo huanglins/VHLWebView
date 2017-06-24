@@ -261,6 +261,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
+    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
     
     // 移除网页进度条
     if (self.navigationController) {
@@ -274,7 +275,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [super viewDidDisappear:animated];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
-    self.navigationController.interactivePopGestureRecognizer.enabled = YES;
     [self.navigationItem setLeftBarButtonItems:nil animated:NO];
 }
 #pragma mark - 屏幕旋转相关方法    ------------------------------------------------
@@ -378,22 +378,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
             [self presentViewController:alert animated:YES completion:^{}];
         }
     }];
-}
-#pragma mark - Cookie ----------------------------------------------------------
-// Cookie -
-- (NSString *)readCurrentCookieWith:(NSDictionary*)dic{
-    if (dic == nil) {
-        return nil;
-    }else{
-        NSHTTPCookieStorage*cookieJar = [NSHTTPCookieStorage sharedHTTPCookieStorage];
-        NSMutableString *cookieString = [[NSMutableString alloc] init];
-        for (NSHTTPCookie*cookie in [cookieJar cookies]) {
-            [cookieString appendFormat:@"%@=%@;",cookie.name,cookie.value];
-        }
-        //删除最后一个“;”
-        [cookieString deleteCharactersInRange:NSMakeRange(cookieString.length - 1, 1)];
-        return cookieString;
-    }
 }
 #pragma mark - ALL Delegate ----------------------------------------------------
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
@@ -506,27 +490,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // 请求成功 前进或者后退
     [self updateNavigationItems];
 }
-// WKNavigation - Delegate - 1.网页请求成功
-- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
-    // 如果需要加载POST
-    if (_didMakePostRequest) {
-        // ** 这里因为 html里面的动画延时为0.5秒，需要等加载动画都执行后在去执行JS，不然动画不会执行**
-        [self performSelector:@selector(evaluateJavaScript:) withObject:_postJScript afterDelay:0.5];
-    }
-    // 全局JS
-    {
-        [[VHLWebViewEvaluateJSHandle shareInstance] evaluateJSWebView:webView];
-    }
-    [self didFinishLoad];
-}
-// WKNavigation - Delegate - 1.请求出现错误
-- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
-    [self didFailLoadWithError:error];
-}
-// WKNavigation - Delegate - 1.网页请求错误
-- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
-    [self didFailLoadWithError:error];
-}
 // WKNavigation - Delegate - 2.发送请求之前，决定是否跳转，可以拦截URL
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
     // Disable all the '_blank' target in page's target.
@@ -552,6 +515,27 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationResponse:(WKNavigationResponse *)navigationResponse decisionHandler:(void (^)(WKNavigationResponsePolicy))decisionHandler {
     decisionHandler(WKNavigationResponsePolicyAllow);
 }
+// WKNavigation - Delegate - 1.网页请求成功
+- (void)webView:(WKWebView *)webView didFinishNavigation:(WKNavigation *)navigation{
+    // 如果需要加载POST
+    if (_didMakePostRequest) {
+        // ** 这里因为 html里面的动画延时为0.5秒，需要等加载动画都执行后在去执行JS，不然动画不会执行**
+        [self performSelector:@selector(evaluateJavaScript:) withObject:_postJScript afterDelay:0.5];
+    }
+    // 全局JS
+    {
+        [[VHLWebViewEvaluateJSHandle shareInstance] evaluateJSWebView:webView];
+    }
+    [self didFinishLoad];
+}
+// WKNavigation - Delegate - 1.请求出现错误
+- (void)webView:(WKWebView *)webView didFailProvisionalNavigation:(WKNavigation *)navigation withError:(NSError *)error{
+    [self didFailLoadWithError:error];
+}
+// WKNavigation - Delegate - 1.网页请求错误
+- (void)webView:(WKWebView *)webView didFailNavigation:(WKNavigation *)navigation withError:(NSError *)error {
+    [self didFailLoadWithError:error];
+}
 // WKNavigation - Delegate - 2.接收到服务器跳转请求后(手势侧滑返回完成)
 - (void)webView:(WKWebView *)webView didReceiveServerRedirectForProvisionalNavigation:(WKNavigation *)navigation{
     // WKWebView 通过侧滑手势返回了一个页面
@@ -572,6 +556,15 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 #endif
 #pragma mark - UIScrollViewDelegate
+- (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    if (scrollView == self.webView.scrollView &&
+        scrollView.contentOffset.x == 0 &&
+        scrollView.contentOffset.y < 0) {
+        scrollView.backgroundColor = [UIColor clearColor];
+    } else {
+        
+    }
+}
 // UIScrollView -
 - (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
 {
@@ -626,11 +619,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     // 修改导航栏按钮
     [self updateNavigationItems];
-    // 网页背景颜色
-    {
-        //self.view.backgroundColor = _webScrollViewBGColor?:[UIColor colorWithRed:0.53 green:0.56 blue:0.62 alpha:1.00];
-        _webView.backgroundColor = _webScrollViewBGColor?:[UIColor clearColor];
-    }
     // 网页来源显示
     {
         NSString *title;
@@ -666,6 +654,17 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         
         [self.webView evaluateJavaScript:jsStr completionHandler:nil];
     }
+    // 网页背景颜色
+    {
+        if (_webView.backgroundColor != _webScrollViewBGColor) {
+            // 延时0.1秒后设置背景颜色，不然闪屏的时候会很突兀
+            dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1/*延迟执行时间*/ * NSEC_PER_SEC));
+            __weak typeof(WKWebView *) weakWebView = _webView;
+            dispatch_after(delayTime, dispatch_get_main_queue(), ^{
+                weakWebView.backgroundColor = _webScrollViewBGColor?:[UIColor clearColor];
+            });
+        }
+    }
     // 获取当前网页内容高度
     {
         _htmlHeight = _webView.scrollView.contentSize.height;
@@ -698,6 +697,22 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
 }
 #pragma mark - Getters  --------------------------------------------------------
+#pragma mark - Cookie ----------------------------------------------------------
+// Cookie -
+- (NSString *)readCurrentCookieWith:(NSDictionary*)dic{
+    if (dic == nil) {
+        return nil;
+    }else{
+        NSHTTPCookieStorage*cookieJar = [NSHTTPCookieStorage sharedHTTPCookieStorage];
+        NSMutableString *cookieString = [[NSMutableString alloc] init];
+        for (NSHTTPCookie*cookie in [cookieJar cookies]) {
+            [cookieString appendFormat:@"%@=%@;",cookie.name,cookie.value];
+        }
+        //删除最后一个“;”
+        [cookieString deleteCharactersInRange:NSMakeRange(cookieString.length - 1, 1)];
+        return cookieString;
+    }
+}
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
 // GET - WKWebview
 - (WKWebView *)webview {
@@ -742,6 +757,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         _webView.allowsLinkPreview = NO;                                        // 禁用3DTouch 预览
     }
     #endif
+
     _webView.backgroundColor = [UIColor clearColor];
     _webView.scrollView.backgroundColor = [UIColor clearColor];
     // 设置使用自动布局
@@ -777,6 +793,42 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _backgroundLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [_backgroundLabel setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
     return _backgroundLabel;
+}
+// GET - 初始化所有UI
+- (void)setupSubviews {
+    id topLayoutGuide    = self.topLayoutGuide;
+    id bottomLayoutGuide = self.bottomLayoutGuide;
+    
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+    // webview
+    [self.view addSubview:self.webview];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView)]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView, topLayoutGuide, bottomLayoutGuide)]];
+    
+    //  bg来源 lable
+    UIView *contentView = _webView;//.subviews.lastObject;
+    [contentView addSubview:self.backgroundLabel];
+    [contentView sendSubviewToBack:self.backgroundLabel];
+    
+    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
+    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
+#endif
+    
+    self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
+    [self.view addSubview:self.progressView];
+    [self.view bringSubviewToFront:self.progressView];
+    
+    // - ** JS 交互框架 ** -
+    [WKWebViewJavascriptBridge enableLogging];
+    _bridge = [WKWebViewJavascriptBridge bridgeForWebView:self.webView];
+    [_bridge setWebViewDelegate:self];
+    
+    // 处理JS相关操作，监听以及注册事件
+    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge];
+    
+    [self.vhlJSBridgeHandle jsSystemHanlde];
+    [self.vhlJSBridgeHandle jsCustomHandle];
 }
 // GET - 导航栏 [返回] 按钮
 - (UIBarButtonItem *)navBackBarButtonItem {
@@ -914,41 +966,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     return _navMenuBarButtonItem;
 }
-// GET - 初始化所有UI
-- (void)setupSubviews {
-    id topLayoutGuide    = self.topLayoutGuide;
-    id bottomLayoutGuide = self.bottomLayoutGuide;
-    
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
-    // webview
-    [self.view addSubview:self.webview];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView)]];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView, topLayoutGuide, bottomLayoutGuide)]];
-    
-    //  bg lable
-    UIView *contentView = _webView.scrollView;//.subviews.lastObject;
-    [contentView addSubview:self.backgroundLabel];
-    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeBottom relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:-20]];
-    
-#endif
-    
-    self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
-    [self.view addSubview:self.progressView];
-    [self.view bringSubviewToFront:self.progressView];
-    
-    // - ** JS 交互框架 ** -
-    [WKWebViewJavascriptBridge enableLogging];
-    _bridge = [WKWebViewJavascriptBridge bridgeForWebView:self.webView];
-    [_bridge setWebViewDelegate:self];
-
-    // 处理JS相关操作，监听以及注册事件
-    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge];
-    
-    [self.vhlJSBridgeHandle jsSystemHanlde];
-    [self.vhlJSBridgeHandle jsCustomHandle];
-}
 #pragma mark - Actions ---------------------------------------------------------
 // 点击回退
 - (void)goBackClicked:(UIBarButtonItem *)sender {
@@ -986,10 +1003,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)navigationItemHandleBack:(UIBarButtonItem *)sender {
     if ([_webView canGoBack]) {
         _navigation = [_webView goBack];
-        // 往上返回到第一张页面的时候开启手势侧滑
-        if (![_webView canGoBack]) {
-            self.navigationController.interactivePopGestureRecognizer.enabled = YES;
-        }
         return;
     }
     self.navigationController.interactivePopGestureRecognizer.enabled = YES;

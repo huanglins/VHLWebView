@@ -37,7 +37,7 @@ NS_ASSUME_NONNULL_BEGIN
 
 // Url.
 @property (nonatomic, readonly) NSURL *URL;
-// web title
+/** 默认显示的标题*/
 @property (nonatomic, strong) NSString *webTitle;
 // ------------------ 可以设置的属性 ------------------
 /** 横屏后是否隐藏状态栏，默认不隐藏。需要在plist中将 View controller-based status bar appearance 设置为 YES */
