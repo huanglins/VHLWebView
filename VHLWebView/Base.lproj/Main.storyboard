@@ -42,12 +42,21 @@
                                     <action selector="goVC:" destination="BYZ-38-t0r" eventType="touchUpInside" id="G1V-iE-Z4v"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="UVj-sO-qfZ">
+                                <rect key="frame" x="161" y="417" width="53" height="30"/>
+                                <state key="normal" title="qr code"/>
+                                <connections>
+                                    <action selector="qrcodeClick:" destination="BYZ-38-t0r" eventType="touchUpInside" id="ysL-TG-j0W"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <color key="backgroundColor" red="1" green="1" blue="1" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
                             <constraint firstItem="1pw-iz-cRY" firstAttribute="top" secondItem="6lT-JZ-S4H" secondAttribute="bottom" constant="20.5" id="BLz-cW-sf4"/>
                             <constraint firstItem="7ZL-uf-CFk" firstAttribute="top" secondItem="1pw-iz-cRY" secondAttribute="bottom" constant="17" id="Cqr-Fx-as0"/>
+                            <constraint firstItem="UVj-sO-qfZ" firstAttribute="top" secondItem="7ZL-uf-CFk" secondAttribute="bottom" constant="20" id="QIK-tC-cfc"/>
                             <constraint firstItem="6lT-JZ-S4H" firstAttribute="centerY" secondItem="8bC-Xf-vdC" secondAttribute="centerY" constant="-49.5" id="XHK-D2-6aa"/>
+                            <constraint firstItem="UVj-sO-qfZ" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="hdM-fO-4rT"/>
                             <constraint firstItem="6lT-JZ-S4H" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="kd5-ZO-cxH"/>
                             <constraint firstItem="7ZL-uf-CFk" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="uMP-M1-LQn"/>
                             <constraint firstItem="1pw-iz-cRY" firstAttribute="centerX" secondItem="8bC-Xf-vdC" secondAttribute="centerX" id="zdk-eI-iaJ"/>

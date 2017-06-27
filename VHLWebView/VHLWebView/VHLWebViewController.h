@@ -40,6 +40,8 @@ NS_ASSUME_NONNULL_BEGIN
 /** 默认显示的标题*/
 @property (nonatomic, strong) NSString *webTitle;
 // ------------------ 可以设置的属性 ------------------
+/** 是否启用3D Touch，默认为no*/
+@property (nonatomic, assign) BOOL allowsLinkPreview;               // 是否启用 webview 的 3D Touch
 /** 横屏后是否隐藏状态栏，默认不隐藏。需要在plist中将 View controller-based status bar appearance 设置为 YES */
 @property (nonatomic, assign) BOOL hideLandscapeStatusBar;          // 横屏状态栏是否显示 |
 /** 是否显示导航栏菜单按钮，默认为不隐藏*/

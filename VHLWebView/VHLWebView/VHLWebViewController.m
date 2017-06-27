@@ -7,17 +7,22 @@
 //
 
 #import "VHLWebViewController.h"
+// System
 #import <objc/runtime.h>
+#import <MessageUI/MessageUI.h>     // 邮件
+// Category
+#import "UIImage+VHLWebQRCode.h"
+// Extented
 #import <Aspects/Aspects.h>
-//#import <UINavigationController+FDFullscreenPopGesture.h>
-#import <MessageUI/MessageUI.h> // 邮件
 // Share
 #import "OpenShare.h"
 #import "OpenShare+Weixin.h"
 #import "OpenShare+QQ.h"
-// menu
+// Tool
+#import "VHLActionSheet.h"
 #import "VHLWebViewShareView.h"
 #import "VHLWebViewChangeFontView.h"
+#import "VHLPermissionRequest.h"
 // route/js handle
 #import "VHLWebViewRouteHandle.h"
 #import "VHLWebViewJSBridgeHandle.h"
@@ -93,7 +98,7 @@
 #endif
 // -----------------------------------------------------------------------------
 
-@interface VHLWebViewController () <WKUIDelegate, WKNavigationDelegate,UIScrollViewDelegate,MFMailComposeViewControllerDelegate>
+@interface VHLWebViewController () <WKUIDelegate, WKNavigationDelegate, UIScrollViewDelegate, UIGestureRecognizerDelegate, MFMailComposeViewControllerDelegate>
 {
     BOOL _loading;
     BOOL _didMakePostRequest;       // 是否加载POST请求
@@ -149,6 +154,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _webView.scrollView.delegate = nil;
     
     _webView = nil;
+}
+- (instancetype)init {
+    if (self = [super init]) {
+        
+    }
+    return self;
 }
 - (instancetype)initWithAddress:(NSString *)urlString {
     return [self initWithURL:[NSURL URLWithString:urlString]];
@@ -207,9 +218,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     self.automaticallyAdjustsScrollViewInsets = YES;                        // 自动调整 inset
     self.extendedLayoutIncludesOpaqueBars = YES;
     
+    self.view.backgroundColor = [UIColor whiteColor];
     [self.navigationController.navigationBar setShadowImage:[UIImage new]];
     
     [self setupSubviews];
+    [self updateNavigationItems];
     
     if (_URL) {
         [self loadURL:_URL];
@@ -224,8 +237,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         _webTextSizeAdjust = 2;
     }
 
-    self.view.backgroundColor = [UIColor whiteColor];
-    self.progressView.progressTintColor = self.progressTintColor?:self.navigationController.navigationBar.tintColor;
+    // webView 监听网页进度
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
 
     // 指定leftButton 和 backButton 可以同时显示。其中leftButton显示在backButton的右边
@@ -322,9 +334,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 #pragma mark - Public 公开调用的方法   -------------------------------------------
 - (void)loadAddress:(NSString *)urlString{
+    _URL = [NSURL URLWithString:urlString];
     [self loadURL:[NSURL URLWithString:urlString]];
 }
 - (void)loadURL:(NSURL *)URL {
+    _URL = URL;
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
     _navigation = [_webView loadRequest:request];
 }
@@ -334,7 +348,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _navigation = [_webView loadHTMLString:HTMLString baseURL:baseURL];
 }
 - (void)loadRequest:(NSMutableURLRequest *)request {
-    _URL = request.URL;
+    _urlRequest = request;
     _navigation = [_webView loadRequest:request];
 }
 - (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title{
@@ -492,6 +506,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 // WKNavigation - Delegate - 2.发送请求之前，决定是否跳转，可以拦截URL
 - (void)webView:(WKWebView *)webView decidePolicyForNavigationAction:(WKNavigationAction *)navigationAction decisionHandler:(void (^)(WKNavigationActionPolicy))decisionHandler {
+    
     // Disable all the '_blank' target in page's target.
     if (!navigationAction.targetFrame.isMainFrame) {
         [webView evaluateJavaScript:@"var a = document.getElementsByTagName('a');for(var i=0;i<a.length;i++){a[i].setAttribute('target','');}" completionHandler:nil];
@@ -578,6 +593,88 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
+#pragma mark - UIGestureRecognizer Delegate  -- 手势代理
+// Gesture - s
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
+{
+    return YES; // 同时响应其他手势
+}
+// Gesture - webview 长按手势
+- (void)handleLongPressWithWebView:(UILongPressGestureRecognizer *)sender
+{
+    if (sender.state != UIGestureRecognizerStateBegan) {
+        return;
+    }
+    CGPoint touchPoint = [sender locationInView:self.webView];
+    NSString *imgJS = [NSString stringWithFormat:@"document.elementFromPoint(%f, %f).src", touchPoint.x, touchPoint.y];
+    // 根据 point 获取 webview 中 img 标签的 src
+    [self.webView evaluateJavaScript:imgJS completionHandler:^(id _Nullable imageUrl, NSError * _Nullable error) {
+        if (imageUrl) {
+            NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrl]];
+            UIImage *image = [UIImage imageWithData:data];
+            if (image) {
+                NSString *qrStr = [image qrCodeByVHLWeb];       // 识别图片中二维码
+                NSLog(@"识别到的图片二维码:%@",qrStr);
+                if (qrStr) {
+                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"识别图片二维码",@"保存图片", nil];
+                    [actionSheet show];
+                    [actionSheet buttonIndex:^(NSInteger index) {
+                        if (index == 1) {
+                            //
+                            UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
+                            pasteboard.string = qrStr;
+                            //
+                            UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"二维码信息已复制" message:nil preferredStyle:UIAlertControllerStyleAlert];
+                            [self presentViewController:alert animated:YES completion:^{
+                                dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC));
+                                dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+                                    [alert dismissViewControllerAnimated:YES completion:nil];
+                                });
+                            }];
+                        } else {
+                            [[VHLPermissionRequest shareInstance] requestPermission:VHLPhotoLibrary title:@"保存图片到相册" description:@"需要访问您的相册才能保存" requestResult:^(BOOL granted, NSError *error) {
+                                if (granted) {
+                                    UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+                                } else {
+                                    NSLog(@"无法写入");
+                                }
+                            }];
+                        }
+                    }];
+                } else {
+                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"保存图片", nil];
+                    [actionSheet show];
+                    [actionSheet buttonIndex:^(NSInteger index) {
+                        if (index == 1) {
+                            [[VHLPermissionRequest shareInstance] requestPermission:VHLPhotoLibrary title:@"保存图片到相册" description:@"需要访问您的相册才能保存" requestResult:^(BOOL granted, NSError *error) {
+                                if (granted) {
+                                    UIImageWriteToSavedPhotosAlbum(image, self, @selector(image:didFinishSavingWithError:contextInfo:), nil);
+                                } else {
+                                    NSLog(@"无法写入");
+                                }
+                            }];
+                        }
+                    }];
+                }
+            }
+        }
+    }];
+}
+- (void)image:(UIImage *)image didFinishSavingWithError:(NSError *)error contextInfo:(void *)contextInfo {
+    NSString *title = @"";
+    if (!error) {
+        title = @"已保存到系统相册";
+    } else {
+        title = @"保存到系统相册失败";
+    }
+    UIAlertController *alert = [UIAlertController alertControllerWithTitle:title message:nil preferredStyle:UIAlertControllerStyleAlert];
+    [self presentViewController:alert animated:YES completion:^{
+        dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC));
+        dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
+            [alert dismissViewControllerAnimated:YES completion:nil];
+        });
+    }];
+}
 #pragma mark - 集中处理的网页方法    ----------------------------------------------
 // 回调 - 网页将要回退
 - (void)willGoBack {
@@ -619,23 +716,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     // 修改导航栏按钮
     [self updateNavigationItems];
-    // 网页来源显示
-    {
-        NSString *title;
-        title = [_webView title]?:@"";
-        
-        if ([title isEqualToString:@""]) {
-            self.navigationItem.title = _webTitle?:@"";
-        } else {
-            self.navigationItem.title = title;
-        }
-        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
-        NSString *bundle = ([infoDictionary objectForKey:@"CFBundleDisplayName"]?:[infoDictionary objectForKey:@"CFBundleName"])?:[infoDictionary objectForKey:@"CFBundleIdentifier"];
-        NSString *host;
-        host = _webView.URL.host;
-        
-        _backgroundLabel.text = [NSString stringWithFormat:@"此网页由 %@ 提供", host?:bundle]; //
-    }
+    
     // 修改当前网页字体
     {
         int scaleValue = 100;
@@ -654,16 +735,32 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         
         [self.webView evaluateJavaScript:jsStr completionHandler:nil];
     }
-    // 网页背景颜色
+    // 网页背景和网页来源
     {
-        if (_webView.backgroundColor != _webScrollViewBGColor) {
-            // 延时0.1秒后设置背景颜色，不然闪屏的时候会很突兀
-            dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.1/*延迟执行时间*/ * NSEC_PER_SEC));
-            __weak typeof(WKWebView *) weakWebView = _webView;
-            dispatch_after(delayTime, dispatch_get_main_queue(), ^{
-                weakWebView.backgroundColor = _webScrollViewBGColor?:[UIColor clearColor];
-            });
+        // 网页来源
+        NSString *title;
+        title = [_webView title]?:@"";
+        
+        if ([title isEqualToString:@""]) {
+            self.navigationItem.title = _webTitle?:@"";
+        } else {
+            self.navigationItem.title = title;
         }
+        NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
+        NSString *bundle = ([infoDictionary objectForKey:@"CFBundleDisplayName"]?:[infoDictionary objectForKey:@"CFBundleName"])?:[infoDictionary objectForKey:@"CFBundleIdentifier"];
+        NSString *host;
+        host = _webView.URL.host;
+        
+        // 网页背景颜色
+        
+        // 延时0.2秒后设置背景颜色，不然闪屏的时候会很突兀
+        __weak typeof(WKWebView *) weakWebView = _webView;
+        __weak typeof(UILabel *) weakBGLable = _backgroundLabel;
+        dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2/*延迟执行时间*/ * NSEC_PER_SEC));
+        dispatch_after(delayTime, dispatch_get_main_queue(), ^{
+            weakWebView.backgroundColor = _webScrollViewBGColor?:[UIColor colorWithRed:0.96 green:0.96 blue:0.96 alpha:1.00];
+            weakBGLable.text = [NSString stringWithFormat:@"此网页由 %@ 提供", host?:bundle];
+        });
     }
     // 获取当前网页内容高度
     {
@@ -718,43 +815,57 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (WKWebView *)webview {
     if (_webView) return _webView;
     WKWebViewConfiguration *config = [[WKWebViewConfiguration alloc] init];
-    // 设置网页最小的字体，默认为0
+    // 1.设置网页最小的字体，默认为0
     config.preferences.minimumFontSize = 9.0;
-    // 默认认为YES
+    // 2.默认认为YES
     config.preferences.javaScriptEnabled = YES;
-    // 是否支持记忆读取
+    // 3.是否支持记忆读取
     config.suppressesIncrementalRendering = YES;
     //
-    
-    // ------ ** 设置cookie ** ------
-    // web内容处理池
+    // 4.web内容处理池
     config.processPool = [[WKProcessPool alloc] init];
-    // 将所有cookie以document.cookie = 'key=value';形式进行拼接
-    // 然而这里的单引号一定要注意是英文的，不要问我为什么告诉你这个(手动微笑)
-    NSString *cookieValue = @"document.cookie = 'fromapp=ios';document.cookie = 'channel=appstore';";
-    
-    // 加cookie给h5识别，表明在ios端打开该地址; 解决后续页面(同域)Ajax、iframe 请求的 Cookie 问题
-    WKUserContentController* userContentController = WKUserContentController.new;
+    // 5.
+    WKPreferences *preferences = [WKPreferences new];
+        //很重要，如果没有设置这个则不会回调createWebViewWithConfiguration方法，也不会回应window.open()方法
+    preferences.javaScriptCanOpenWindowsAutomatically = YES;
+    config.preferences = preferences;
+    // ------ ** 设置 webview 自带需要执行的JS ** ------
+    // 1.加cookie给h5识别，表明在ios端打开该地址; 解决后续页面(同域)Ajax、iframe 请求的 Cookie 问题
+    NSString *cookieValueJS = @"document.cookie = 'fromapp=ios';document.cookie = 'channel=appstore';";
     WKUserScript * cookieScript = [[WKUserScript alloc]
-                                   initWithSource: cookieValue
+                                   initWithSource: cookieValueJS
                                    injectionTime:WKUserScriptInjectionTimeAtDocumentStart forMainFrameOnly:NO];
+    // 2. 禁止 img 标签的 callouts，不会弹出系统自带的menuController，然后自实现长按图片识别操作。 ** 可以自定义其他标签 **
+    NSString *disableCalloutsJS = @"var style = document.createElement('style'); \
+    style.type = 'text/css'; \
+    style.innerText = 'img:not(input):not(textarea) { -webkit-user-select: none; -webkit-touch-callout: none; }'; \
+    var head = document.getElementsByTagName('head')[0];\
+    head.appendChild(style);";
+    WKUserScript *disableCalloutsScript = [[WKUserScript alloc] initWithSource:disableCalloutsJS injectionTime:WKUserScriptInjectionTimeAtDocumentEnd forMainFrameOnly:YES];
+
+    WKUserContentController* userContentController = [WKUserContentController new];
+    // 添加 userScript
     [userContentController addUserScript:cookieScript];
+    [userContentController addUserScript:disableCalloutsScript];
     config.userContentController = userContentController;
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
     // 设置网页的 UserAgent（用户代理）- 将当前应用程序的名称设置为UserAgent
     if ([config respondsToSelector:@selector(setApplicationNameForUserAgent:)]) {
         [config setApplicationNameForUserAgent:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]];
     }
+    //允许视频播放
+    config.allowsAirPlayForMediaPlayback = YES;
     // 内联媒体播放的回调,自动播放
     if ([config respondsToSelector:@selector(setAllowsInlineMediaPlayback:)]) {
-        [config setAllowsInlineMediaPlayback:YES];
+        config.allowsInlineMediaPlayback = YES;
     }
 #endif
     _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
+    _webView.userInteractionEnabled = YES;
     _webView.allowsBackForwardNavigationGestures = YES;                         // 左划回退
     #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
     if ([_webView respondsToSelector:@selector(setAllowsLinkPreview:)]) {
-        _webView.allowsLinkPreview = NO;                                        // 禁用3DTouch 预览
+        _webView.allowsLinkPreview = self.allowsLinkPreview;                    // 3DTouch 预览,Peek 和 Pop
     }
     #endif
 
@@ -766,6 +877,13 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _webView.navigationDelegate = self;
     _webView.scrollView.delegate = self;
     
+    // 添加长按手势
+    UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressWithWebView:)];
+    longPress.minimumPressDuration = 0.5f;
+    longPress.allowableMovement = 20.f;
+    longPress.delegate = self;
+    [_webView addGestureRecognizer:longPress];
+    
     return _webView;
 }
 // GET - progressView
@@ -776,6 +894,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     CGRect barFrame = CGRectMake(0, navigationBarBounds.size.height - progressBarHeight, navigationBarBounds.size.width, progressBarHeight);
     _progressView = [[UIProgressView alloc] initWithFrame:barFrame];
     _progressView.trackTintColor = [UIColor clearColor];
+    _progressView.progressTintColor = self.progressTintColor?:self.navigationController.navigationBar.tintColor;
     _progressView.vhl_hiddenWhenProgressApproachFullSize = YES;
     _progressView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     return _progressView;
@@ -798,8 +917,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)setupSubviews {
     id topLayoutGuide    = self.topLayoutGuide;
     id bottomLayoutGuide = self.bottomLayoutGuide;
-    
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+
     // webview
     [self.view addSubview:self.webview];
     [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView)]];
@@ -813,8 +931,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
     [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
     [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
-#endif
-    
+
+    // 进度条 progress view
     self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
     [self.view addSubview:self.progressView];
     [self.view bringSubviewToFront:self.progressView];
@@ -1134,9 +1252,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                                                                  UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                                                                  
                                                                  if ([self.webView.URL.scheme isEqualToString:@"file"]) {
-                                                                     pasteboard.string = self.URL.absoluteString?:@"www.vincents.cn";
+                                                                     pasteboard.string = self.URL.absoluteString?:@"";
                                                                  } else {
-                                                                     pasteboard.string = self.webView.URL.absoluteString?:@"www.vincents.cn";
+                                                                     pasteboard.string = self.webView.URL.absoluteString?:@"";
                                                                  }
                                                                  // 弹出提示
                                                                  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接已经复制" message:nil preferredStyle:UIAlertControllerStyleAlert];
@@ -1251,7 +1369,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
 }
 #pragma mark - Hook ------------------------------------------------------------
-// Hook - webContentCommit
+// Hook - webContentCommit 网页的 Peek 和 pop
 - (void)hookWebContentCommitPreviewHandler {
     // Find the `WKContentView` in the webview.
     __weak typeof(self) wself = self;

@@ -13,6 +13,7 @@
 - (IBAction)goWebView:(id)sender;
 - (IBAction)goUIWebview:(id)sender;
 - (IBAction)goVC:(id)sender;
+- (IBAction)qrcodeClick:(id)sender;
 
 @end
 
