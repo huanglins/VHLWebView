@@ -68,7 +68,6 @@
     //
     self.shareSpaceView.frame = frame;
     [self.shareSpaceView layoutSubviews];
-    
 }
 #pragma mark - private method
 - (void)addToKeyWindow {
@@ -153,6 +152,4 @@
 {
     [self setNeedsLayout];
 }
-
-
 @end

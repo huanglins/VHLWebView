@@ -10,6 +10,16 @@
 
 @implementation VHLWebViewEvaluateJSHandle
 
+static  NSString * const jsGetImages = @"function getImages(){\
+    var objs = document.getElementsByTagName(\"img\");\
+                                             var imgArray = new Array();\
+                                             for(var i=0;i<objs.length;i++){\
+                                                 imgArray.push(objs[i].src);\
+                                             };\
+                                             return imgArray;\
+                                             };\
+getImages();";
+
 // 单例
 + (instancetype)shareInstance
 {
@@ -23,7 +33,13 @@
 
 - (void)evaluateJSWebView:(WKWebView *)webview {
     NSString *host = webview.URL.host;
-    // 修改华兴银行网页颜色
+    // 1. 获取当前网页下所有图片链接的数组
+    {
+        [webview evaluateJavaScript:jsGetImages completionHandler:^(id imagesResult, NSError * _Nullable error) {
+            //NSLog(@"%@ %@",imagesResult, [error description]);
+        }];
+    }
+    // 2. 修改华兴银行网页颜色
     if ([@[@"183.63.131.106"] containsObject:host]){
         // document.getElementsByClassName('header_btn_left')[0].style.display = \"none\";
         // document.getElementsByClassName('ui-menu-header')[0].style.display = \"none\";

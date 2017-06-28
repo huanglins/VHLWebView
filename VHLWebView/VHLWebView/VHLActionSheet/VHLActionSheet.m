@@ -36,8 +36,6 @@
     int _tag;
 }
 
-@property (nonatomic, strong) UIWindow *rootWindow;
-
 @property (nonatomic, weak) VHLActionSheet *actionSheet;
 @property (nonatomic, weak) UIView *sheetView;
 
@@ -49,6 +47,9 @@
 
 @implementation VHLActionSheet
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 /**
  *  创建对象方法
  */
@@ -67,13 +68,10 @@
     actionSheet.frame = [UIScreen mainScreen].bounds;
     actionSheet.backgroundColor = [UIColor blackColor];
 
-    self.rootWindow = [[UIWindow alloc] initWithFrame:[UIScreen mainScreen].bounds];
-    self.rootWindow.windowLevel = UIWindowLevelAlert;  // 高于状态栏
-    [self.rootWindow addSubview:actionSheet];
-    [self.rootWindow makeKeyAndVisible];
+    [[UIApplication sharedApplication].keyWindow addSubview:actionSheet];
 
     actionSheet.alpha = 0.0;
-    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(coverClick)];
+    UITapGestureRecognizer *tap = [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(hide)];
     [actionSheet addGestureRecognizer:tap];
     
     // sheet 容器视图
@@ -125,15 +123,47 @@
     
     // iPad 居中
     if(VHL_isPad){
-        sheetView.bounds = CGRectMake(0, 0, ScreenWidth * 0.68, 0);
+        sheetView.bounds = CGRectMake(0, 0, ScreenWidth * 0.68, sheetView.frame.size.height);
         sheetView.layer.cornerRadius = 6;
         sheetView.layer.masksToBounds = YES;
         sheetView.center = CGPointMake(ScreenWidth / 2, ScreenHeight / 2);
+        
+        for (UIView *subView in self.sheetView.subviews) {
+            CGRect subViewFrame = subView.frame;
+            subView.frame = CGRectMake(subViewFrame.origin.x, subView.frame.origin.y, self.sheetView.frame.size.width, subViewFrame.size.height);
+        }
     }
     
+    // 添加屏幕旋转的监听
+    [[NSNotificationCenter defaultCenter] addObserver:self
+                                             selector:@selector(handleDeviceOrientationDidChange:)
+                                                 name:UIDeviceOrientationDidChangeNotification
+                                               object:nil
+     ];
     return actionSheet;
 }
-
+- (void)handleDeviceOrientationDidChange:(UIInterfaceOrientation)interfaceOrientation
+{
+    // actionSheet
+    self.actionSheet.frame = [UIScreen mainScreen].bounds;
+    // sheetview
+    CGRect sheetViewFrame = self.sheetView.frame;
+    self.sheetView.frame = CGRectMake(0, ScreenHeight - sheetViewFrame.size.height, ScreenWidth, sheetViewFrame.size.height);
+    // iPad 居中
+    if(VHL_isPad){
+        self.sheetView.bounds = CGRectMake(0, 0, ScreenWidth * 0.68, sheetViewFrame.size.height);
+        self.sheetView.layer.cornerRadius = 6;
+        self.sheetView.layer.masksToBounds = YES;
+        self.sheetView.center = CGPointMake(ScreenWidth / 2, ScreenHeight / 2);
+    }
+    
+    for (UIView *subView in self.sheetView.subviews) {
+        CGRect subViewFrame = subView.frame;
+        subView.frame = CGRectMake(subViewFrame.origin.x, subView.frame.origin.y, self.sheetView.frame.size.width, subViewFrame.size.height);
+    }
+}
+#pragma mark --------------- 显示/隐藏 ---------------
+/** 显示*/
 - (void)show{
     self.sheetView.hidden = NO;
 
@@ -157,7 +187,32 @@
             self.sheetView.alpha = 1.0;
         }];
     }
-    
+}
+/** 隐藏*/
+- (void)hide
+{
+    if (VHL_isPad) {
+        [UIView animateWithDuration:0.2 animations:^{
+            self.sheetView.alpha = 0.0;
+            self.actionSheet.alpha = 0.0;
+        } completion:^(BOOL finished) {
+            [self.sheetView removeFromSuperview];
+            [self.actionSheet removeFromSuperview];
+            //[self.rootWindow resignKeyWindow];
+        }];
+    } else {
+        CGRect sheetViewF = self.sheetView.frame;
+        sheetViewF.origin.y = ScreenHeight;
+        
+        [UIView animateWithDuration:0.2 animations:^{
+            self.sheetView.frame = sheetViewF;
+            self.actionSheet.alpha = 0.0;
+        } completion:^(BOOL finished) {
+            [self.sheetView removeFromSuperview];
+            [self.actionSheet removeFromSuperview];
+            //[self.rootWindow resignKeyWindow];
+        }];
+    }
 }
 - (void)buttonIndex:(SelectedButtonIndexBlock)sBlock
 {
@@ -210,48 +265,21 @@
     _tag ++;
 }
 //------------------------------------------------------------------------------
-/**
- *  隐藏视图
- */
-- (void)coverClick{
-    if (VHL_isPad) {
-        [UIView animateWithDuration:0.2 animations:^{
-            self.sheetView.alpha = 0.0;
-            self.actionSheet.alpha = 0.0;
-        } completion:^(BOOL finished) {
-            [self.actionSheet removeFromSuperview];
-            [self.sheetView removeFromSuperview];
-            [self.rootWindow resignKeyWindow];
-        }];
-    } else {
-        CGRect sheetViewF = self.sheetView.frame;
-        sheetViewF.origin.y = ScreenHeight;
-        
-        [UIView animateWithDuration:0.2 animations:^{
-            self.sheetView.frame = sheetViewF;
-            self.actionSheet.alpha = 0.0;
-        } completion:^(BOOL finished) {
-            [self.actionSheet removeFromSuperview];
-            [self.sheetView removeFromSuperview];
-            [self.rootWindow resignKeyWindow];
-        }];
-    }
-}
 
 - (void)sheetBtnClick:(UIButton *)btn{
     if (btn.tag == 0) {
-        [self coverClick];
+        [self hide];
         return;
     }
     
     if ([self.delegate respondsToSelector:@selector(actionSheet:clickedButtonAtIndex:)]) {
         [self.delegate actionSheet:self.actionSheet clickedButtonAtIndex:btn.tag];
-        [self coverClick];
+        [self hide];
     }
     if(self.sBlock)
     {
         self.sBlock(btn.tag);
-        [self coverClick];
+        [self hide];
     }
 }
 #pragma mark - Util - - - - - - - - - - - - - - - - - - - -- - - - - - - - - - -

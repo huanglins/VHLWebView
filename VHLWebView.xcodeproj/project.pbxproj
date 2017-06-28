@@ -51,7 +51,6 @@
 		BF085DF31EFA495700C935CA /* VHLWebViewShareView.m in Sources */ = {isa = PBXBuildFile; fileRef = BF085DC61EFA495700C935CA /* VHLWebViewShareView.m */; };
 		BF4971891EE7AC3100EB868E /* post_data in Resources */ = {isa = PBXBuildFile; fileRef = BF4971881EE7AC3100EB868E /* post_data */; };
 		BF595BD81F00DE1F00FBD52F /* VHLActionSheet.m in Sources */ = {isa = PBXBuildFile; fileRef = BF595BD71F00DE1F00FBD52F /* VHLActionSheet.m */; };
-		BF595BDC1F00E51200FBD52F /* UIImage+VHLWebQRCode.m in Sources */ = {isa = PBXBuildFile; fileRef = BF595BDB1F00E51200FBD52F /* UIImage+VHLWebQRCode.m */; };
 		BF595BE51F00EDD100FBD52F /* VHLWebViewEvaluateJSHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = BF595BE01F00EDD100FBD52F /* VHLWebViewEvaluateJSHandle.m */; };
 		BF595BE61F00EDD100FBD52F /* VHLWebViewJSBridgeHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = BF595BE21F00EDD100FBD52F /* VHLWebViewJSBridgeHandle.m */; };
 		BF595BE71F00EDD100FBD52F /* VHLWebViewRouteHandle.m in Sources */ = {isa = PBXBuildFile; fileRef = BF595BE41F00EDD100FBD52F /* VHLWebViewRouteHandle.m */; };
@@ -64,6 +63,10 @@
 		BF700B521D6D67F20028F3D8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BF700B501D6D67F20028F3D8 /* LaunchScreen.storyboard */; };
 		BF700B5D1D6D67F30028F3D8 /* VHLWebViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BF700B5C1D6D67F30028F3D8 /* VHLWebViewTests.m */; };
 		BF8B05BF1ED922EF008FAEDD /* TowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF8B05BE1ED922EF008FAEDD /* TowViewController.m */; };
+		BFEAA75C1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA75B1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m */; };
+		BFEAA75F1F035E520094DCD4 /* NSURLProtocol+WKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA75E1F035E510094DCD4 /* NSURLProtocol+WKWebView.m */; };
+		BFEAA7681F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA7671F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m */; };
+		BFEAA76E1F03A24A0094DCD4 /* NSData+VHLWebDataType.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA76D1F03A24A0094DCD4 /* NSData+VHLWebDataType.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -141,8 +144,6 @@
 		BF4971881EE7AC3100EB868E /* post_data */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = post_data; sourceTree = "<group>"; };
 		BF595BD61F00DE1F00FBD52F /* VHLActionSheet.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLActionSheet.h; sourceTree = "<group>"; };
 		BF595BD71F00DE1F00FBD52F /* VHLActionSheet.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLActionSheet.m; sourceTree = "<group>"; };
-		BF595BDA1F00E51200FBD52F /* UIImage+VHLWebQRCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+VHLWebQRCode.h"; sourceTree = "<group>"; };
-		BF595BDB1F00E51200FBD52F /* UIImage+VHLWebQRCode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+VHLWebQRCode.m"; sourceTree = "<group>"; };
 		BF595BDF1F00EDD100FBD52F /* VHLWebViewEvaluateJSHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLWebViewEvaluateJSHandle.h; sourceTree = "<group>"; };
 		BF595BE01F00EDD100FBD52F /* VHLWebViewEvaluateJSHandle.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLWebViewEvaluateJSHandle.m; sourceTree = "<group>"; };
 		BF595BE11F00EDD100FBD52F /* VHLWebViewJSBridgeHandle.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLWebViewJSBridgeHandle.h; sourceTree = "<group>"; };
@@ -166,6 +167,14 @@
 		BF700B5E1D6D67F30028F3D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		BF8B05BD1ED922EF008FAEDD /* TowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TowViewController.h; sourceTree = "<group>"; };
 		BF8B05BE1ED922EF008FAEDD /* TowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TowViewController.m; sourceTree = "<group>"; };
+		BFEAA75A1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLWebViewNSURLProtocol.h; sourceTree = "<group>"; };
+		BFEAA75B1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLWebViewNSURLProtocol.m; sourceTree = "<group>"; };
+		BFEAA75D1F035E510094DCD4 /* NSURLProtocol+WKWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLProtocol+WKWebView.h"; sourceTree = "<group>"; };
+		BFEAA75E1F035E510094DCD4 /* NSURLProtocol+WKWebView.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSURLProtocol+WKWebView.m"; sourceTree = "<group>"; };
+		BFEAA7661F03A1F20094DCD4 /* UIImage+VHLWebQRCode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "UIImage+VHLWebQRCode.h"; sourceTree = "<group>"; };
+		BFEAA7671F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "UIImage+VHLWebQRCode.m"; sourceTree = "<group>"; };
+		BFEAA76C1F03A24A0094DCD4 /* NSData+VHLWebDataType.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSData+VHLWebDataType.h"; sourceTree = "<group>"; };
+		BFEAA76D1F03A24A0094DCD4 /* NSData+VHLWebDataType.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = "NSData+VHLWebDataType.m"; sourceTree = "<group>"; };
 		C2B229A0AE561F0213B440E9 /* Pods-VHLWebView.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-VHLWebView.debug.xcconfig"; path = "Pods/Target Support Files/Pods-VHLWebView/Pods-VHLWebView.debug.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -217,6 +226,7 @@
 				BF595BDE1F00EDD100FBD52F /* VHLWebJSBriged */,
 				BF085DA71EFA495700C935CA /* VHLWebViewShareView */,
 				BF085DA01EFA495700C935CA /* VHLWebViewChangeFontView */,
+				BFEAA7591F035D7A0094DCD4 /* VHLNSURLProtocol */,
 				BF085D9D1EFA495700C935CA /* VHLPopNavigationController.h */,
 				BF085D9E1EFA495700C935CA /* VHLPopNavigationController.m */,
 				BF085DA51EFA495700C935CA /* VHLWebViewController.h */,
@@ -343,8 +353,8 @@
 		BF595BD91F00E4F100FBD52F /* Category */ = {
 			isa = PBXGroup;
 			children = (
-				BF595BDA1F00E51200FBD52F /* UIImage+VHLWebQRCode.h */,
-				BF595BDB1F00E51200FBD52F /* UIImage+VHLWebQRCode.m */,
+				BFEAA7641F03A1F20094DCD4 /* NSData */,
+				BFEAA7651F03A1F20094DCD4 /* UIImage */,
 			);
 			path = Category;
 			sourceTree = "<group>";
@@ -434,6 +444,35 @@
 			children = (
 			);
 			path = UINavigationController;
+			sourceTree = "<group>";
+		};
+		BFEAA7591F035D7A0094DCD4 /* VHLNSURLProtocol */ = {
+			isa = PBXGroup;
+			children = (
+				BFEAA75D1F035E510094DCD4 /* NSURLProtocol+WKWebView.h */,
+				BFEAA75E1F035E510094DCD4 /* NSURLProtocol+WKWebView.m */,
+				BFEAA75A1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.h */,
+				BFEAA75B1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m */,
+			);
+			path = VHLNSURLProtocol;
+			sourceTree = "<group>";
+		};
+		BFEAA7641F03A1F20094DCD4 /* NSData */ = {
+			isa = PBXGroup;
+			children = (
+				BFEAA76C1F03A24A0094DCD4 /* NSData+VHLWebDataType.h */,
+				BFEAA76D1F03A24A0094DCD4 /* NSData+VHLWebDataType.m */,
+			);
+			path = NSData;
+			sourceTree = "<group>";
+		};
+		BFEAA7651F03A1F20094DCD4 /* UIImage */ = {
+			isa = PBXGroup;
+			children = (
+				BFEAA7661F03A1F20094DCD4 /* UIImage+VHLWebQRCode.h */,
+				BFEAA7671F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m */,
+			);
+			path = UIImage;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -622,7 +661,6 @@
 				BF595BEA1F00EE3E00FBD52F /* VHLPermissionRequest.m in Sources */,
 				BF595BE51F00EDD100FBD52F /* VHLWebViewEvaluateJSHandle.m in Sources */,
 				BF595BE61F00EDD100FBD52F /* VHLWebViewJSBridgeHandle.m in Sources */,
-				BF595BDC1F00E51200FBD52F /* UIImage+VHLWebQRCode.m in Sources */,
 				BF085DC91EFA495700C935CA /* OpenShare+Weixin.m in Sources */,
 				BF085DCA1EFA495700C935CA /* OpenShare.m in Sources */,
 				BF085DCE1EFA495700C935CA /* WKWebViewJavascriptBridge.m in Sources */,
@@ -630,8 +668,12 @@
 				BF085DD91EFA495700C935CA /* VHLWebViewChangeFontView.m in Sources */,
 				BF085DCD1EFA495700C935CA /* WebViewJavascriptBridgeBase.m in Sources */,
 				BF595BD81F00DE1F00FBD52F /* VHLActionSheet.m in Sources */,
+				BFEAA75F1F035E520094DCD4 /* NSURLProtocol+WKWebView.m in Sources */,
+				BFEAA76E1F03A24A0094DCD4 /* NSData+VHLWebDataType.m in Sources */,
 				BF085DD61EFA495700C935CA /* VHLPopNavigationController.m in Sources */,
+				BFEAA75C1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m in Sources */,
 				BF085DC81EFA495700C935CA /* OpenShare+QQ.m in Sources */,
+				BFEAA7681F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m in Sources */,
 				BF085DCC1EFA495700C935CA /* WebViewJavascriptBridge_JS.m in Sources */,
 				BF085DF21EFA495700C935CA /* VHLWebViewShareSpaceView.m in Sources */,
 				BF085DEF1EFA495700C935CA /* VHLWebViewShareItem.m in Sources */,
@@ -779,6 +821,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = cn.vincents.VHLWebView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -794,6 +837,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = cn.vincents.VHLWebView;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};

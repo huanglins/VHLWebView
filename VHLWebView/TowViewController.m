@@ -57,10 +57,11 @@
     
     //[webView loadRequest:request];
     
-    NSString *HTMLString = [[NSString alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"vhlwebhtml.bundle/post" ofType:@"html"] encoding:NSUTF8StringEncoding error:nil];
-    NSURL *baseURL = [[NSBundle mainBundle] bundleURL];
+//    NSString *HTMLString = [[NSString alloc] initWithContentsOfFile:[[NSBundle mainBundle] pathForResource:@"vhlwebhtml.bundle/post" ofType:@"html"] encoding:NSUTF8StringEncoding error:nil];
+//    NSURL *baseURL = [[NSBundle mainBundle] bundleURL];
     
-    [webView loadHTMLString:HTMLString baseURL:baseURL];
+    //[webView loadHTMLString:HTMLString baseURL:baseURL];
+    [webView loadRequest:[NSURLRequest requestWithURL:[NSURL URLWithString:@"https://www.baidu.com"]]];
 }
 - (UIBarButtonItem *)sBackBarButtonItem {
     return [[UIBarButtonItem alloc] initWithTitle:@"返回" style:UIBarButtonItemStyleDone target:self action:@selector(navigationItemHandleBack)];

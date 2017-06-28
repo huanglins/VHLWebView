@@ -10,6 +10,8 @@
 // System
 #import <objc/runtime.h>
 #import <MessageUI/MessageUI.h>     // 邮件
+// NSURLProtocol
+#import "VHLWebViewNSURLProtocol.h"
 // Category
 #import "UIImage+VHLWebQRCode.h"
 // Extented
@@ -145,6 +147,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 
 #pragma mark - Life cycle 生命周期
 - (void)dealloc{
+    [NSURLProtocol unregisterClass:[VHLWebViewNSURLProtocol class]];
+    
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
     [_webView stopLoading];
@@ -222,7 +226,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [self.navigationController.navigationBar setShadowImage:[UIImage new]];
     
     [self setupSubviews];
-    [self updateNavigationItems];
     
     if (_URL) {
         [self loadURL:_URL];
@@ -241,8 +244,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [_webView addObserver:self forKeyPath:@"estimatedProgress" options:NSKeyValueObservingOptionNew context:NULL];
 
     // 指定leftButton 和 backButton 可以同时显示。其中leftButton显示在backButton的右边
-    // self.navigationItem.leftItemsSupplementBackButton = YES;
     self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
+    
+    // NSURLProtocol 接管网络请求协议
+    [NSURLProtocol registerClass:[VHLWebViewNSURLProtocol class]];
+    [NSURLProtocol wk_registerScheme:@"http"];
+    [NSURLProtocol wk_registerScheme:@"https"];
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -269,7 +276,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // ----- 监听屏幕设备旋转 -----
     UIDevice *device = [UIDevice currentDevice]; //Get the device object
     [device beginGeneratingDeviceOrientationNotifications]; //Tell it to start monitoring the accelerometer for orientation
-    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(orientationChanged:) name:UIDeviceOrientationDidChangeNotification  object:device];
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(handleOrientationChanged:) name:UIDeviceOrientationDidChangeNotification  object:device];
 }
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
@@ -306,7 +313,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
     [self updateNavigationItems];
 }
-- (void)orientationChanged:(NSNotification *)note  {
+- (void)handleOrientationChanged:(NSNotification *)note  {
     [self updateNavigationItems];
 }
 //设置是否隐藏状态栏
@@ -879,7 +886,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     // 添加长按手势
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressWithWebView:)];
-    longPress.minimumPressDuration = 0.5f;
+    longPress.minimumPressDuration = 0.3f;
     longPress.allowableMovement = 20.f;
     longPress.delegate = self;
     [_webView addGestureRecognizer:longPress];
@@ -1426,6 +1433,33 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }else{
         return YES;
     }
+}
+#pragma mark - 清理缓存 ----------------------------------------------------------
+/** 清理缓存*/
++ (void)clearCache
+{
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+    // 清理所有类型的缓存数据
+    NSSet *websiteDataTypes = [WKWebsiteDataStore allWebsiteDataTypes];
+    // 清理多久的缓存
+    NSDate *dateFrom = [NSDate dateWithTimeIntervalSince1970:0];
+    // 执行清理
+    [[WKWebsiteDataStore defaultDataStore] removeDataOfTypes:websiteDataTypes modifiedSince:dateFrom completionHandler:^{
+        //
+        NSLog(@"[*]VHLWebView - 清理缓存完成");
+    }];
+#else
+    NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
+    NSString *bundleId = [[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleIdentifier"];
+    
+    NSString *cookiesFolderPath = [NSString stringWithFormat:@"%@/Cookies",libraryDir];
+    NSString *webkitFolderInLib = [NSString stringWithFormat:@"%@/WebKit",libraryDir];
+    NSString *webKitFolderInCaches = [NSString stringWithFormat:@"%@/Caches/%@/WebKit",libraryDir,bundleId];
+    NSError *error;
+    [[NSFileManager defaultManager] removeItemAtPath:cookiesFolderPath error:&error];
+    [[NSFileManager defaultManager] removeItemAtPath:webKitFolderInCaches error:&error];
+    [[NSFileManager defaultManager] removeItemAtPath:webkitFolderInLib error:&error];
+#endif
 }
 #pragma mark - 系统事件 ----------------------------------------------------------
 // System - 系统相关事件

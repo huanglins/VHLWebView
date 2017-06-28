@@ -40,10 +40,10 @@ typedef void(^SelectedButtonIndexBlock)(NSInteger index);
                   cancelTitle:(NSString *)cancelTitle
        destructiveButtonTitle:(NSString *)destructiveTitle
                   otherTitles:(NSString *)otherTitles,... NS_REQUIRES_NIL_TERMINATION;
-/**
- *  显示
- */
+/** 显示*/
 - (void)show;
+/** 隐藏*/
+- (void)hide;
 /**
  *  按钮回调
  */

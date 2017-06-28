@@ -29,6 +29,8 @@
 
 - (void)viewDidLoad {
     [super viewDidLoad];
+    NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
+    NSLog(@"%@",libraryDir);
 }
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation     NS_AVAILABLE_IOS(6_0)
 {
@@ -88,7 +90,7 @@
     //[webVC loadPostRequestURL:urlString postData:pad title:@""];
     //VHLWebViewController *webVC = [[VHLWebViewController alloc] initWithRequest:request];
     //webVC.hidesNavigationBarWhenPushed = YES;
-    [webVC loadURL:[NSURL URLWithString:@"http://mp.weixin.qq.com/s/kA6jey5FG_EeoRGxNe3TFA"]];
+    [webVC loadURL:[NSURL URLWithString:@"https://www.pingliandai.com/integ/index.html"]];
     webVC.progressTintColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.navTitleColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.webScrollViewBGColor = [UIColor colorWithRed:0.18 green:0.19 blue:0.20 alpha:1.00];

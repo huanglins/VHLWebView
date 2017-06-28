@@ -85,7 +85,9 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)evaluateJavaScript:(NSString *)js;
 /** 调用右上角分享*/
 - (void)navigationMenuButtonClicked;
-// 子类可以重写该方法
+/** 清理缓存*/
++ (void)clearCache;
+// < 子类可以重写该方法 >
 - (void)willGoBack VHL_REQUIRES_SUPER;
 - (void)willGoForward VHL_REQUIRES_SUPER;
 - (void)willReload VHL_REQUIRES_SUPER;
