@@ -39,6 +39,9 @@
 @property (nonatomic, weak) VHLActionSheet *actionSheet;
 @property (nonatomic, weak) UIView *sheetView;
 
+@property (nonatomic, strong) UIView *titleView;
+@property (nonatomic, strong) UILabel *titleLabel;
+
 @property (nonatomic, strong) SelectedButtonIndexBlock sBlock;
 
 @property (nonatomic, assign) CGFloat topTitleHeight;
@@ -123,7 +126,7 @@
     
     // iPad 居中
     if(VHL_isPad){
-        sheetView.bounds = CGRectMake(0, 0, ScreenWidth * 0.68, sheetView.frame.size.height);
+        sheetView.bounds = CGRectMake(0, 0, MIN(ScreenWidth * 0.68, 600), sheetView.frame.size.height);
         sheetView.layer.cornerRadius = 6;
         sheetView.layer.masksToBounds = YES;
         sheetView.center = CGPointMake(ScreenWidth / 2, ScreenHeight / 2);
@@ -132,6 +135,7 @@
             CGRect subViewFrame = subView.frame;
             subView.frame = CGRectMake(subViewFrame.origin.x, subView.frame.origin.y, self.sheetView.frame.size.width, subViewFrame.size.height);
         }
+        self.titleLabel.center = self.titleView.center;
     }
     
     // 添加屏幕旋转的监听
@@ -151,7 +155,7 @@
     self.sheetView.frame = CGRectMake(0, ScreenHeight - sheetViewFrame.size.height, ScreenWidth, sheetViewFrame.size.height);
     // iPad 居中
     if(VHL_isPad){
-        self.sheetView.bounds = CGRectMake(0, 0, ScreenWidth * 0.68, sheetViewFrame.size.height);
+        self.sheetView.bounds = CGRectMake(0, 0, MIN(ScreenWidth * 0.68, 600), sheetViewFrame.size.height);
         self.sheetView.layer.cornerRadius = 6;
         self.sheetView.layer.masksToBounds = YES;
         self.sheetView.center = CGPointMake(ScreenWidth / 2, ScreenHeight / 2);
@@ -161,6 +165,7 @@
         CGRect subViewFrame = subView.frame;
         subView.frame = CGRectMake(subViewFrame.origin.x, subView.frame.origin.y, self.sheetView.frame.size.width, subViewFrame.size.height);
     }
+    self.titleLabel.center = self.titleView.center;
 }
 #pragma mark --------------- 显示/隐藏 ---------------
 /** 显示*/
@@ -222,25 +227,28 @@
 - (void)setupTopTitle:(NSString *)title
 {
     CGFloat svWidth = self.sheetView.bounds.size.width;
-    UIView *topTitleView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, svWidth, 60)];
-    topTitleView.backgroundColor = [UIColor whiteColor];
-    [self.sheetView addSubview:topTitleView];
+    if (VHL_isPad) {
+        svWidth = MIN(ScreenWidth * 0.68, 600);
+    }
+    self.titleView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, svWidth, 60)];
+    self.titleView.backgroundColor = [UIColor whiteColor];
+    [self.sheetView addSubview:self.titleView];
     
-    UILabel *titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, svWidth - 20, 100)];
-    titleLabel.numberOfLines = 4;
-    titleLabel.font = [UIFont systemFontOfSize:14];
-    titleLabel.text = title;
-    titleLabel.textColor = [UIColor colorWithRed:0.6 green:0.6039 blue:0.6078 alpha:1.0];
-    titleLabel.adjustsFontSizeToFitWidth = YES;
-    titleLabel.textAlignment = NSTextAlignmentCenter;
-    [titleLabel sizeToFit];
-    [topTitleView addSubview:titleLabel];
+    self.titleLabel = [[UILabel alloc] initWithFrame:CGRectMake(0, 0, svWidth - 20, 100)];
+    self.titleLabel.numberOfLines = 4;
+    self.titleLabel.font = [UIFont systemFontOfSize:14];
+    self.titleLabel.text = title;
+    self.titleLabel.textColor = [UIColor colorWithRed:0.6 green:0.6039 blue:0.6078 alpha:1.0];
+    self.titleLabel.adjustsFontSizeToFitWidth = YES;
+    self.titleLabel.textAlignment = NSTextAlignmentCenter;
+    [self.titleLabel sizeToFit];
+    [self.titleView addSubview:self.titleLabel];
     
-    CGRect topTRect = topTitleView.frame;
-    topTRect.size.height = MAX(60, titleLabel.frame.size.height + 40);
-    topTitleView.frame = topTRect;
+    CGRect topTRect = self.titleLabel.frame;
+    topTRect.size.height = MAX(60, self.titleLabel.frame.size.height + 40);
+    self.titleLabel.frame = topTRect;
     
-    titleLabel.center = topTitleView.center;
+    self.titleLabel.center = self.titleView.center;
     
     _topTitleHeight = topTRect.size.height;
 }

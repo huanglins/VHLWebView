@@ -68,3 +68,15 @@ typedef void(^VHLRequestResult)(BOOL granted, NSError *error);
     来源
     https://github.com/AppleDP/WQPermissionRequest
  */
+/*
+    *** iOS 10 以后需要在 info.plist 中添加所有使用到的权限，否则会提交失败 ***
+ 
+    Privacy - Photo Library Usage Description
+    Privacy - Camera Usage Description
+    Privacy - Microphone Usage Description
+    Privacy - Location Usage Description
+    Privacy - Location Always Usage Description
+    Privacy - Calendars Usage Description
+    Privacy - Reminders Usage Description
+    Privacy - Contacts Usage Description
+ */

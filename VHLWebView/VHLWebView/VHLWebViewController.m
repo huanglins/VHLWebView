@@ -620,10 +620,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
             NSData *data = [NSData dataWithContentsOfURL:[NSURL URLWithString:imageUrl]];
             UIImage *image = [UIImage imageWithData:data];
             if (image) {
-                NSString *qrStr = [image qrCodeByVHLWeb];       // 识别图片中二维码
-                NSLog(@"识别到的图片二维码:%@",qrStr);
+                NSString *qrStr = [image qrCodeByVHLWeb];       // 识别图中二维码
+                NSLog(@"识别到的图中二维码:%@",qrStr);
                 if (qrStr) {
-                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"识别图片二维码",@"保存图片", nil];
+                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"识别图中二维码",@"保存图片", nil];
                     [actionSheet show];
                     [actionSheet buttonIndex:^(NSInteger index) {
                         if (index == 1) {
@@ -649,7 +649,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                         }
                     }];
                 } else {
-                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"保存图片", nil];
+                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:@"你好大方手动阀发送" delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"保存图片", nil];
                     [actionSheet show];
                     [actionSheet buttonIndex:^(NSInteger index) {
                         if (index == 1) {
