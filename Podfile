@@ -3,7 +3,7 @@ platform :ios, '7.0'
 
 target 'VHLWebView' do
 pod 'Aspects'                                                      # -- * --
-pod 'JZNavigationExtension'
+#pod 'JZNavigationExtension'
 end
 
 #target 'AXWebViewController' do

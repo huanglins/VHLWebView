@@ -13,8 +13,9 @@
 #define VHL_TITLE_HEIGHT    30.0f
 #define VHL_TITLE_PADDING   20.0f
 
-@interface VHLWebViewShareSpaceView()<UITableViewDataSource,UITableViewDelegate>
+@interface VHLWebViewShareSpaceView()<UITableViewDataSource, UITableViewDelegate>
 
+@property (nonatomic, strong) UIView *contentView;
 @property (nonatomic, strong) UITableView *tableView;
 
 @end
@@ -23,14 +24,26 @@
 
 - (instancetype)initWithFrame:(CGRect)frame {
     if (self = [super initWithFrame:frame]) {
+        self.userInteractionEnabled = YES;
         [self commonInit];
     }
     return self;
 }
 - (void)commonInit {
-    [self addSubview:self.titleLabel];
-    [self addSubview:self.tableView];
-    [self addSubview:self.cancelButton];
+
+    self.contentView = [[UIView alloc] initWithFrame:self.bounds];
+    self.contentView.backgroundColor = [UIColor clearColor];
+    [self.contentView addSubview:self.titleLabel];
+    [self.contentView addSubview:self.tableView];
+    [self.contentView addSubview:self.cancelButton];
+    
+    /** 适配iOS11 */
+    if (@available(iOS 11.0, *)) {
+        UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:self.contentView];
+        [self setItems:@[barItem]];
+    } else {
+        [self addSubview:self.contentView];
+    }
 }
 - (void)layoutSubviews {
     [super layoutSubviews];
@@ -38,6 +51,7 @@
     frame.size.height = [self shareSpaceHeight];
     frame.size.width = VHL_SCREEN_WIDTH;
     self.frame = frame;
+    self.contentView.frame = self.bounds;       // **
     
     // 标题
     self.titleLabel.frame = CGRectMake(VHL_TITLE_PADDING, 0, VHL_SCREEN_WIDTH - 2 * VHL_TITLE_PADDING, VHL_TITLE_HEIGHT);

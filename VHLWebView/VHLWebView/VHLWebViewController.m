@@ -147,7 +147,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 
 #pragma mark - Life cycle 生命周期
 - (void)dealloc{
+    // protocol
     [NSURLProtocol unregisterClass:[VHLWebViewNSURLProtocol class]];
+    [NSURLProtocol wk_unregisterScheme:@"http"];
+    [NSURLProtocol wk_unregisterScheme:@"https"];
     
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     [_webView removeObserver:self forKeyPath:@"estimatedProgress"];
@@ -161,7 +164,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 - (instancetype)init {
     if (self = [super init]) {
-        
+        self.webBounces = YES;              // 是否回弹
+        self.navBackButtonTitle = @"返回";
     }
     return self;
 }
@@ -169,27 +173,28 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     return [self initWithURL:[NSURL URLWithString:urlString]];
 }
 - (instancetype)initWithURL:(NSURL *)URL {
-    if (self = [super init]) {
-        _URL = URL;
+    if (self = [self init]) {
+        _URL = [self verifyURLavailable:URL];
     }
     return self;
 }
 - (instancetype)initWithHTMLString:(NSString *)HTMLString baseURL:(NSURL *)baseURL {
-    if (self = [super init]) {
+    if (self = [self init]) {
         _HTMLString = HTMLString;
-        _baseURL = baseURL;
+        _baseURL = [self verifyURLavailable:baseURL];
     }
     return self;
 }
 - (instancetype)initWithRequest:(NSMutableURLRequest *)request {
-    if (self = [super init]) {
+    if (self = [self init]) {
         _urlRequest = request;
+        _urlRequest.URL = [self verifyURLavailable:request.URL];
     }
     return self;
 }
 - (instancetype)initWithPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title
 {
-    if (self = [super init]) {
+    if (self = [self init]) {
         _webTitle = title;
         self.navigationItem.title = _webTitle;
         
@@ -199,13 +204,15 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         _didMakePostRequest = YES;
         // 构建需要执行的JS
         NSMutableString *parametersStr = [NSMutableString string];
-        for (NSString *key in parameters.allKeys) {
-            #pragma clang diagnostic push
-            #pragma clang diagnostic ignored "-Wdeprecated-declarations"
-            //含警告的代码,如下,btn为UIButton类型的指针
-            NSString *value = [parameters[key?:@""]?:@"" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];;
-            #pragma clang diagnostic pop
-            [parametersStr appendString:[NSString stringWithFormat:@"\"%@\":\"%@\",", key, value]];
+        if ([parameters isKindOfClass:[NSDictionary class]]) {
+            for (NSString *key in parameters.allKeys) {
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-declarations"
+                //含警告的代码,如下,btn为UIButton类型的指针
+                NSString *value = [parameters[key?:@""]?:@"" stringByAddingPercentEscapesUsingEncoding:NSUTF8StringEncoding];;
+#pragma clang diagnostic pop
+                [parametersStr appendString:[NSString stringWithFormat:@"\"%@\":\"%@\",", key, value]];
+            }
         }
         parametersStr = (NSMutableString *)[parametersStr substringToIndex:parametersStr.length - 1];
         _postJScript = [NSString stringWithFormat:@"post('%@', {%@});", url, parametersStr];
@@ -223,7 +230,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     self.extendedLayoutIncludesOpaqueBars = YES;
     
     self.view.backgroundColor = [UIColor whiteColor];
-    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
+    // 隐藏导航栏分割线
+    //[self.navigationController.navigationBar setShadowImage:[UIImage new]];
     
     [self setupSubviews];
     
@@ -246,10 +254,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // 指定leftButton 和 backButton 可以同时显示。其中leftButton显示在backButton的右边
     self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
     
-    // NSURLProtocol 接管网络请求协议
-    [NSURLProtocol registerClass:[VHLWebViewNSURLProtocol class]];
-    [NSURLProtocol wk_registerScheme:@"http"];
-    [NSURLProtocol wk_registerScheme:@"https"];
+    // NSURLProtocol 接管网络请求协议，但是 POST 中的 Data 被会丢掉
+    //[NSURLProtocol registerClass:[VHLWebViewNSURLProtocol class]];
+    //[VHLWebViewNSURLProtocol setFilterURLPres:[NSSet setWithObjects:@"http",@"https",nil]];
+    //[NSURLProtocol wk_registerScheme:@"http"];
+    //[NSURLProtocol wk_registerScheme:@"https"];
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
@@ -297,6 +306,16 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [self.navigationItem setLeftBarButtonItems:nil animated:NO];
 }
 #pragma mark - 屏幕旋转相关方法    ------------------------------------------------
+// 支持设备自动旋转
+- (BOOL)shouldAutorotate
+{
+    return YES;
+}
+// 支持竖屏显示
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
+}
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
     if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
         return YES;
@@ -345,17 +364,18 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [self loadURL:[NSURL URLWithString:urlString]];
 }
 - (void)loadURL:(NSURL *)URL {
-    _URL = URL;
+    _URL = [self verifyURLavailable:URL];
     NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:URL];
     _navigation = [_webView loadRequest:request];
 }
 - (void)loadHTMLString:(NSString *)HTMLString baseURL:(NSURL *)baseURL {
-    _baseURL = baseURL;
+    _baseURL = [self verifyURLavailable:baseURL];
     _HTMLString = HTMLString;
     _navigation = [_webView loadHTMLString:HTMLString baseURL:baseURL];
 }
 - (void)loadRequest:(NSMutableURLRequest *)request {
     _urlRequest = request;
+    _urlRequest.URL = [self verifyURLavailable:request.URL];
     _navigation = [_webView loadRequest:request];
 }
 - (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title{
@@ -382,6 +402,16 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _postJScript = [NSString stringWithFormat:@"post('%@', {%@});", url, parametersStr];
     
     [self loadHTMLString:_HTMLString baseURL:_baseURL];
+}
+/** 验证URL是否可用*/
+- (NSURL *)verifyURLavailable:(NSURL *)url
+{
+    // 如果地址没有 scheme，那么补上 http:// ,不然会无法访问
+    if (!url.scheme) {
+        NSURL *newURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",@"http://",url.absoluteString]];
+        return newURL;
+    }
+    return url;
 }
 // 执行JS
 - (void)evaluateJavaScript:(NSString *)js
@@ -649,7 +679,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                         }
                     }];
                 } else {
-                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:@"你好大方手动阀发送" delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"保存图片", nil];
+                    VHLActionSheet *actionSheet = [[VHLActionSheet alloc] initWithTitle:nil delegate:nil cancelTitle:@"取消" destructiveButtonTitle:nil otherTitles:@"保存图片", nil];
                     [actionSheet show];
                     [actionSheet buttonIndex:^(NSInteger index) {
                         if (index == 1) {
@@ -800,7 +830,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         [self presentViewController:alert animated:YES completion:^{}];
     }
 }
-#pragma mark - Getters  --------------------------------------------------------
 #pragma mark - Cookie ----------------------------------------------------------
 // Cookie -
 - (NSString *)readCurrentCookieWith:(NSDictionary*)dic{
@@ -817,7 +846,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         return cookieString;
     }
 }
-#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
+#pragma mark - Getters  --------------------------------------------------------
 // GET - WKWebview
 - (WKWebView *)webview {
     if (_webView) return _webView;
@@ -861,7 +890,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         [config setApplicationNameForUserAgent:[[[NSBundle mainBundle] infoDictionary] objectForKey:@"CFBundleDisplayName"]];
     }
     //允许视频播放
-    config.allowsAirPlayForMediaPlayback = YES;
+    if ([config respondsToSelector:@selector(setAllowsAirPlayForMediaPlayback:)]) {
+        config.allowsAirPlayForMediaPlayback = YES;
+    }
     // 内联媒体播放的回调,自动播放
     if ([config respondsToSelector:@selector(setAllowsInlineMediaPlayback:)]) {
         config.allowsInlineMediaPlayback = YES;
@@ -878,6 +909,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 
     _webView.backgroundColor = [UIColor clearColor];
     _webView.scrollView.backgroundColor = [UIColor clearColor];
+    _webView.scrollView.bounces = self.webBounces;                              // 是否回弹
     // 设置使用自动布局
     _webView.translatesAutoresizingMaskIntoConstraints = NO;
     _webView.UIDelegate = self;
@@ -906,7 +938,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _progressView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleTopMargin;
     return _progressView;
 }
-#endif
 // GET - 网页由 ** 提供 Lable
 - (UILabel *)backgroundLabel {
     if (_backgroundLabel) return _backgroundLabel;
@@ -919,41 +950,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _backgroundLabel.translatesAutoresizingMaskIntoConstraints = NO;
     [_backgroundLabel setContentCompressionResistancePriority:UILayoutPriorityRequired forAxis:UILayoutConstraintAxisVertical];
     return _backgroundLabel;
-}
-// GET - 初始化所有UI
-- (void)setupSubviews {
-    id topLayoutGuide    = self.topLayoutGuide;
-    id bottomLayoutGuide = self.bottomLayoutGuide;
-
-    // webview
-    [self.view addSubview:self.webview];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView)]];
-    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView, topLayoutGuide, bottomLayoutGuide)]];
-    
-    //  bg来源 lable
-    UIView *contentView = _webView;//.subviews.lastObject;
-    [contentView addSubview:self.backgroundLabel];
-    [contentView sendSubviewToBack:self.backgroundLabel];
-    
-    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
-
-    // 进度条 progress view
-    self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
-    [self.view addSubview:self.progressView];
-    [self.view bringSubviewToFront:self.progressView];
-    
-    // - ** JS 交互框架 ** -
-    [WKWebViewJavascriptBridge enableLogging];
-    _bridge = [WKWebViewJavascriptBridge bridgeForWebView:self.webView];
-    [_bridge setWebViewDelegate:self];
-    
-    // 处理JS相关操作，监听以及注册事件
-    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge];
-    
-    [self.vhlJSBridgeHandle jsSystemHanlde];
-    [self.vhlJSBridgeHandle jsCustomHandle];
 }
 // GET - 导航栏 [返回] 按钮
 - (UIBarButtonItem *)navBackBarButtonItem {
@@ -1002,14 +998,16 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     UIColor *titleColor = self.navTitleColor?:self.navigationController.navigationBar.tintColor;
     [backButton setTitleColor:titleColor forState:UIControlStateNormal];
     [backButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
-    //
-    [backButton setTitle:@"返回" forState:UIControlStateNormal];
+    // 按钮字体样式
+    [backButton setTitle:self.navBackButtonTitle?:@"返回" forState:UIControlStateNormal];
     backButton.titleLabel.font = self.navButtonTitleFont?:(self.navigationController.navigationBar.titleTextAttributes[NSFontAttributeName]?:[UIFont systemFontOfSize:16]);
+    // edge
+    //backButton.imageEdgeInsets = UIEdgeInsetsMake(0, -26, 0, 0);
     backButton.titleEdgeInsets = UIEdgeInsetsMake(0, -6, 0, 0);     // 图片和字体靠近一点
+    backButton.contentEdgeInsets = UIEdgeInsetsMake(0, -12, 0, 0);
     
     [backButton addTarget:self action:@selector(navigationItemHandleBack:) forControlEvents:UIControlEventTouchUpInside];
     [backButton sizeToFit];
-    //_navCloseBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:0 target:self action:@selector(doneButtonClicked:)];
     _navBackBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:backButton];
     
     return _navBackBarButtonItem;
@@ -1026,7 +1024,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         [closeButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
         [closeButton addTarget:self action:@selector(doneButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
         [closeButton sizeToFit];
-        //_navCloseBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:0 target:self action:@selector(doneButtonClicked:)];
+        //
+        closeButton.contentEdgeInsets = UIEdgeInsetsMake(0, -12, 0, 0);
         _navCloseBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:closeButton];
     } else {
         UIButton *closeButton = [[UIButton alloc] init];
@@ -1037,7 +1036,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         [closeButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
         [closeButton addTarget:self action:@selector(navigationIemHandleClose:) forControlEvents:UIControlEventTouchUpInside];
         [closeButton sizeToFit];
-        //_navCloseBarButtonItem = [[UIBarButtonItem alloc] initWithTitle:@"关闭" style:0 target:self action:@selector(navigationIemHandleClose:)];
+        //
+        closeButton.contentEdgeInsets = UIEdgeInsetsMake(0, -12, 0, 0);
         _navCloseBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:closeButton];
     }
     return _navCloseBarButtonItem;
@@ -1084,12 +1084,75 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     // 按钮图片
     [menuButton setImage:menuItemImage forState:UIControlStateNormal];
     [menuButton setImage:menuItemHlImage forState:UIControlStateHighlighted];
+    [menuButton sizeToFit];
+    // edge **
+    menuButton.imageEdgeInsets = UIEdgeInsetsMake(0, 2, 0, 0);
     
     [menuButton addTarget:self action:@selector(navigationMenuButtonClicked) forControlEvents:UIControlEventTouchUpInside];
-    [menuButton sizeToFit];
     _navMenuBarButtonItem = [[UIBarButtonItem alloc] initWithCustomView:menuButton];
     
     return _navMenuBarButtonItem;
+}
+#pragma mark - SETTER  --------------------------------------------------------
+// SET - 初始化所有UI
+- (void)setupSubviews {
+    id topLayoutGuide    = self.topLayoutGuide;
+    id bottomLayoutGuide = self.bottomLayoutGuide;
+    
+    // webview
+    [self.view addSubview:self.webview];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView)]];
+    [self.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[_webView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_webView, topLayoutGuide, bottomLayoutGuide)]];
+    
+    //  bg来源 lable
+    UIView *contentView = _webView;//.subviews.lastObject;
+    [contentView addSubview:self.backgroundLabel];
+    [contentView sendSubviewToBack:self.backgroundLabel];
+    
+    [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
+    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
+    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
+    
+    // 进度条 progress view
+    self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
+    [self.view addSubview:self.progressView];
+    [self.view bringSubviewToFront:self.progressView];
+    
+    // - ** JS 交互框架 ** -
+    [WKWebViewJavascriptBridge enableLogging];
+    _bridge = [WKWebViewJavascriptBridge bridgeForWebView:self.webView];
+    [_bridge setWebViewDelegate:self];
+    
+    // 处理JS相关操作，监听以及注册事件
+    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge];
+    
+    [self.vhlJSBridgeHandle jsSystemHanlde];
+    [self.vhlJSBridgeHandle jsCustomHandle];
+}
+// SET - 修改导航栏按钮样式
+- (void)updateNavigationItems {
+    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
+    
+    if (self.webview.canGoBack) {
+        self.navigationController.interactivePopGestureRecognizer.enabled = NO;
+        if (self.navigationController.viewControllers.count == 1) {
+            [self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem,self.navCloseBarButtonItem] animated:NO];
+        } else {
+            [self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem,self.navCloseBarButtonItem] animated:NO];
+        }
+    } else {
+        self.navigationController.interactivePopGestureRecognizer.enabled = YES;
+        self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
+        //[self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem] animated:NO];
+    }
+    if (!_hideNavMenuBarButton) {
+        self.navigationItem.rightBarButtonItems = @[self.navMenuBarButtonItem];
+    } else {
+        self.navigationItem.rightBarButtonItems = nil;
+    }
+    
+    // 解决自定义 backBarButtonItem 后侧滑手势不可使用问题
+    //self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
 }
 #pragma mark - Actions ---------------------------------------------------------
 // 点击回退
@@ -1324,33 +1387,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [shareView show];
 }
 #pragma mark - Helper ----------------------------------------------------------
-// Helper - 修改导航栏按钮样式
-- (void)updateNavigationItems {
-    [self.navigationItem setLeftBarButtonItem:nil animated:NO];
-    UIBarButtonItem *spaceButtonItem = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemFixedSpace target:nil action:nil];
-    spaceButtonItem.width = -10;
-    
-    if (self.webview.canGoBack) {
-        self.navigationController.interactivePopGestureRecognizer.enabled = NO;
-        if (self.navigationController.viewControllers.count == 1) {
-            [self.navigationItem setLeftBarButtonItems:@[spaceButtonItem,self.navBackBarButtonItem,spaceButtonItem,self.navCloseBarButtonItem] animated:NO];
-        } else {
-            [self.navigationItem setLeftBarButtonItems:@[spaceButtonItem,self.navBackBarButtonItem,spaceButtonItem,self.navCloseBarButtonItem] animated:NO];
-        }
-    } else {
-        self.navigationController.interactivePopGestureRecognizer.enabled = YES;
-        // [self.navigationItem setLeftBarButtonItems:nil animated:NO];
-        [self.navigationItem setLeftBarButtonItems:@[spaceButtonItem,self.navBackBarButtonItem] animated:NO];
-    }
-    if (!_hideNavMenuBarButton) {
-        self.navigationItem.rightBarButtonItems = @[self.navMenuBarButtonItem];
-    } else {
-        self.navigationItem.rightBarButtonItems = nil;
-    }
-    
-    // 解决自定义 backBarButtonItem 后侧滑手势不可使用问题
-    //self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
-}
 // Helper - 修改进度条
 - (void)updateFrameOfProgressView {
     CGFloat progressBarHeight = 2.0f;

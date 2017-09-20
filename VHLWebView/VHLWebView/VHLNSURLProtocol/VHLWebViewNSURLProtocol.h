@@ -11,7 +11,15 @@
 
 @interface VHLWebViewNSURLProtocol : NSURLProtocol
 
+// 添加需要过滤的请求前缀
++ (NSSet *)filterURLPres;
++ (void)setFilterURLPres:(NSSet *)filterURLPres;
+
 /** 清除Cache*/
 + (void)clearCache;
 
 @end
+
+/*
+    不建议使用了。POST 会有大问题。
+ */

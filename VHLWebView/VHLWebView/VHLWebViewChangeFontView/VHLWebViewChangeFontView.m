@@ -102,7 +102,14 @@
         
         [self addSubview:self.dimBackgroundView];
         [self addSubview:self.fontSizeBGView];
-        [self.fontSizeBGView addSubview:self.sliderView];
+        
+        /** 适配iOS11 */
+        if (@available(iOS 11.0, *)) {
+            UIBarButtonItem *barItem = [[UIBarButtonItem alloc] initWithCustomView:self.sliderView];
+            [self.fontSizeBGView setItems:@[barItem]];
+        } else {
+            [self.fontSizeBGView addSubview:self.sliderView];
+        }
     }
 }
 - (void)removeFromKeyWindow {

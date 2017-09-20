@@ -16,6 +16,9 @@
 static NSString* const kVHLWebViewNSURLProtocolKey = @"kVHLWebViewNSURLProtocolKey";
 static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为360秒 可以任意的更改
 
+static NSObject *VHLURLSessionFilterURLPreObject;
+static NSSet *VHLURLSessionFilterURLPre;
+
 // -----------------------------------------------------------------------------
 // - 缓存数据 -
 @interface VHLWebViewProtocolCacheData: NSObject<NSCoding>
@@ -62,6 +65,30 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
 
 @end
 // -----------------------------------------------------------------------------
+// - NSURLRequest -
+@interface NSURLRequest(MutableCopyWorkaround)
+- (id)mutableCopyWorkaround;
+@end
+@implementation NSURLRequest (MutableCopyWorkaround)
+
+-(id)mutableCopyWorkaround {
+    
+    NSMutableURLRequest *mutableURLRequest = [[NSMutableURLRequest alloc] initWithURL:[self URL]
+                                                                          cachePolicy:[self cachePolicy]
+                                                                      timeoutInterval:[self timeoutInterval]];
+    [mutableURLRequest setAllHTTPHeaderFields:[self allHTTPHeaderFields]];
+    if ([self HTTPBodyStream]) {
+        [mutableURLRequest setHTTPBodyStream:[self HTTPBodyStream]];
+    } else {
+        [mutableURLRequest setHTTPBody:[self HTTPBody]];
+    }
+    [mutableURLRequest setHTTPMethod:[self HTTPMethod]];
+    
+    return mutableURLRequest;
+}
+
+@end
+// -----------------------------------------------------------------------------
 // - NSURLProtocol -
 @interface VHLWebViewNSURLProtocol()<NSURLSessionDelegate>
 
@@ -90,9 +117,10 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
  */
 + (BOOL)canInitWithRequest:(NSURLRequest *)request
 {
-    NSString *scheme = [[request URL] scheme];
-    if (([scheme caseInsensitiveCompare:@"http"]  == NSOrderedSame ||
-         [scheme caseInsensitiveCompare:@"https"] == NSOrderedSame ))
+    if ([request.HTTPMethod isEqualToString:@"POST"]) {
+        return NO;
+    }
+    if ([self p_isFilterWithUrlString:request.URL.absoluteString])
     {
         // 看看是否已经处理过了，防止无限循环
         if ([NSURLProtocol propertyForKey:kVHLWebViewNSURLProtocolKey inRequest:request])
@@ -139,7 +167,7 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
         }
     } else {
         //
-        NSMutableURLRequest *mutableReqeust = [[self request] mutableCopy];
+        NSMutableURLRequest *mutableReqeust = [self.request mutableCopyWorkaround];
         [mutableReqeust setValue:nil forHTTPHeaderField:kVHLWebViewNSURLProtocolKey];
         
         //给我们处理过的请求设置一个标识符, 防止无限循环,
@@ -161,7 +189,7 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task willPerformHTTPRedirection:(NSHTTPURLResponse *)response newRequest:(NSURLRequest *)request completionHandler:(void (^)(NSURLRequest * _Nullable))completionHandler {
     // 处理重定向问题
     if (response) {
-        NSMutableURLRequest *redirectableRequest = [request mutableCopy];
+        NSMutableURLRequest *redirectableRequest = [request mutableCopyWorkaround];
         [redirectableRequest setValue:@"vincent" forHTTPHeaderField:kVHLWebViewNSURLProtocolKey];
         VHLWebViewProtocolCacheData *cacheData = [[VHLWebViewProtocolCacheData alloc] init];
         cacheData.data = self.cacheData;
@@ -232,6 +260,18 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
         return NO;
     }
 }
++ (BOOL)p_isFilterWithUrlString:(NSString *)urlString {
+    
+    BOOL state = NO;
+    for (NSString *str in VHLURLSessionFilterURLPre) {
+        
+        if ([urlString hasPrefix:str]) {
+            state = YES;
+            break;
+        }
+    }
+    return state;
+}
 // 将需要存储的 url地址序列化为文件名
 - (NSString *)cachedFileNameForKey:(NSString *)key {
     const char *str = [key UTF8String];
@@ -247,6 +287,18 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
     return filename;
 }
 #pragma mark - public method
++ (NSSet *)filterURLPres {
+    NSSet *set;
+    @synchronized (VHLURLSessionFilterURLPreObject) {
+        set = VHLURLSessionFilterURLPre;
+    }
+    return set;
+}
++ (void)setFilterURLPres:(NSSet *)filterURLPres {
+    @synchronized (VHLURLSessionFilterURLPreObject) {
+        VHLURLSessionFilterURLPre = filterURLPres;
+    }
+}
 /** 清除Cache*/
 + (void)clearCache
 {
@@ -256,5 +308,6 @@ static NSUInteger const KCacheTime = 360;   //缓存的时间  默认设置为36
     NSError *error;
     [[NSFileManager defaultManager] removeItemAtPath:cacheDicPath error:&error];
 }
+
 @end
 

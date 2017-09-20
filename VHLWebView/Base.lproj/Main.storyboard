@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16F73" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BGg-8a-1aV">
+<document type="com.apple.InterfaceBuilder3.CocoaTouch.Storyboard.XIB" version="3.0" toolsVersion="12121" systemVersion="16G29" targetRuntime="iOS.CocoaTouch" propertyAccessControl="none" useAutolayout="YES" useTraitCollections="YES" colorMatched="YES" initialViewController="BGg-8a-1aV">
     <device id="retina4_7" orientation="portrait">
         <adaptation id="fullscreen"/>
     </device>
@@ -68,10 +68,10 @@
             </objects>
             <point key="canvasLocation" x="1152" y="429"/>
         </scene>
-        <!--Navigation Controller-->
+        <!--Base NavigationC-->
         <scene sceneID="L6V-aV-JfK">
             <objects>
-                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="BGg-8a-1aV" sceneMemberID="viewController">
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="BGg-8a-1aV" customClass="BaseNavigationC" sceneMemberID="viewController">
                     <toolbarItems/>
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="T7f-Zp-Uuo">
                         <rect key="frame" x="0.0" y="0.0" width="320" height="44"/>

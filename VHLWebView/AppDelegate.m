@@ -9,6 +9,9 @@
 #import "AppDelegate.h"
 #import "OpenShareHeader.h"
 
+#import "BaseNavigationC.h"
+#import "ViewController.h"
+
 @interface AppDelegate ()
 
 @end
@@ -19,14 +22,13 @@
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
     // Override point for customization after application launch.
     self.window.backgroundColor = [UIColor whiteColor];
-    [[UINavigationBar appearance] setTintColor:[UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0]];
-    [[UIBarButtonItem appearance] setTitleTextAttributes:[NSDictionary dictionaryWithObjectsAndKeys:[UIColor colorWithRed:0.322 green:0.322 blue:0.322 alpha:1.00],NSForegroundColorAttributeName, [UIFont systemFontOfSize:16],NSFontAttributeName , nil] forState:0];
     [[UINavigationBar appearance]setBarTintColor:[UIColor whiteColor]];
-    [[UINavigationBar appearance] setBackIndicatorImage:[UIImage imageNamed:@"vhl_nav_back"]];
-    [[UINavigationBar appearance] setBackIndicatorTransitionMaskImage:[UIImage imageNamed:@"vhl_nav_back"]];
-    [[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -2) forBarMetrics:UIBarMetricsDefault];
-    [[UINavigationBar appearance] setShadowImage:[self imageWithColor:[UIColor colorWithRed:0.8354 green:0.8354 blue:0.8354 alpha:1.0]]];
+    //[[UIBarButtonItem appearance] setBackButtonTitlePositionAdjustment:UIOffsetMake(0, -2) forBarMetrics:UIBarMetricsDefault];
+    //[[UINavigationBar appearance] setShadowImage:[self imageWithColor:[UIColor colorWithRed:0.8354 green:0.8354 blue:0.8354 alpha:1.0]]];
     
+    ViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"viewcontroller1"];
+    BaseNavigationC *navigationC = [[BaseNavigationC alloc] initWithRootViewController:vc];
+    self.window.rootViewController = navigationC;
     
     [OpenShare connectQQWithAppId:@"1103194207"];
     [OpenShare connectWeixinWithAppId:@"wx4380971b4ff92e6d"];

@@ -9,11 +9,6 @@
 			<key>isShown</key>
 			<false/>
 		</dict>
-		<key>JZNavigationExtension.xcscheme</key>
-		<dict>
-			<key>isShown</key>
-			<false/>
-		</dict>
 		<key>Pods-VHLWebView.xcscheme</key>
 		<dict>
 			<key>isShown</key>
@@ -22,12 +17,7 @@
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
-		<key>0FBCFD31BA63C194601C25DFDC2C78C0</key>
-		<dict>
-			<key>primary</key>
-			<true/>
-		</dict>
-		<key>2DD6608893129866CB45D7E2CD98E92D</key>
+		<key>AB3FB986E0FC5371511B06717D36F807</key>
 		<dict>
 			<key>primary</key>
 			<true/>

@@ -15,6 +15,9 @@
 {
     NSData *imageData = UIImagePNGRepresentation(self);
     CIImage *ciImage = [CIImage imageWithData:imageData];
+    if (!ciImage) {
+        return @"";
+    }
     
     CIDetector *detector = [CIDetector detectorOfType:CIDetectorTypeQRCode context:nil options:@{CIDetectorAccuracy: CIDetectorAccuracyLow}];
     NSArray *array = [detector featuresInImage:ciImage];

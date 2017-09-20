@@ -20,5 +20,9 @@
 - (CGFloat)shareSpaceHeight;
 - (CGFloat)initialHeight;
 
-
 @end
+
+/**
+     iOS11 下 UIToolBar 上层会有一个 UIButtonBarStackView
+     添加到 UIToolBar 上的UI会失效
+ */

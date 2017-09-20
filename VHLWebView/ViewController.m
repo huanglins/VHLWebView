@@ -7,8 +7,10 @@
 //
 
 #import "ViewController.h"
-#import "TowViewController.h"
 #import "VHLWebViewController.h"
+#import "VHLNavigation.h"
+
+#import "TestViewController1.h"
 //#import <UINavigationController+FDFullscreenPopGesture.h>
 //#import "UINavigationController+JZExtension.h"
 //#import <UINavigationController+JZExtension.h>
@@ -30,6 +32,9 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     NSString *libraryDir = NSSearchPathForDirectoriesInDomains(NSLibraryDirectory,NSUserDomainMask, YES)[0];
+    
+    self.navigationController.navigationBar.barStyle = UIBarStyleBlack;
+    self.navigationController.navigationBar.translucent = YES;
     NSLog(@"%@",libraryDir);
 }
 - (UIInterfaceOrientation)preferredInterfaceOrientationForPresentation     NS_AVAILABLE_IOS(6_0)
@@ -39,6 +44,11 @@
 - (BOOL)shouldAutorotate
 {
     return NO;
+}
+// 支持竖屏显示
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations
+{
+    return UIInterfaceOrientationMaskPortrait;
 }
 
 - (void)didReceiveMemoryWarning {
@@ -90,22 +100,30 @@
     //[webVC loadPostRequestURL:urlString postData:pad title:@""];
     //VHLWebViewController *webVC = [[VHLWebViewController alloc] initWithRequest:request];
     //webVC.hidesNavigationBarWhenPushed = YES;
-    [webVC loadURL:[NSURL URLWithString:@"https://www.pingliandai.com/integ/index.html"]];
+    [webVC loadURL:[NSURL URLWithString:@"https://www.bing.com"]];
     webVC.progressTintColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.navTitleColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.webScrollViewBGColor = [UIColor colorWithRed:0.18 green:0.19 blue:0.20 alpha:1.00];
+    //webVC.navBackButtonImage = [UIImage imageNamed:@"back"];
+    webVC.navBackButtonTitle = @"首页";
     webVC.allowsLinkPreview = YES;
+    
+    [webVC vhl_setNavBarShadowImageHidden:NO];
     [self.navigationController pushViewController:webVC animated:YES];
 }
 
 - (IBAction)goUIWebview:(id)sender {
-    TowViewController *vc = [[TowViewController alloc] init];
-    [self.navigationController pushViewController:vc animated:YES];
+    //TowViewController *vc = [[TowViewController alloc] init];
+    //[self.navigationController pushViewController:vc animated:YES];
 }
 
 - (IBAction)goVC:(id)sender {
-    ViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"viewcontroller1"];
-    [self.navigationController pushViewController:vc animated:YES];
+//    ViewController *vc = [[UIStoryboard storyboardWithName:@"Main" bundle:nil] instantiateViewControllerWithIdentifier:@"viewcontroller1"];
+//    [vc vhl_setNavBarBarTintColor:[UIColor greenColor]];
+//    [vc vhl_setNavBarShadowImageHidden:YES];
+//    [self.navigationController pushViewController:vc animated:YES];
+    TestViewController1 *vc1 = [[TestViewController1 alloc] init];
+    [self.navigationController pushViewController:vc1 animated:YES];
 }
 
 - (IBAction)qrcodeClick:(id)sender {

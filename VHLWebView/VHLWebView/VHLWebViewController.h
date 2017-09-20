@@ -46,8 +46,12 @@ NS_ASSUME_NONNULL_BEGIN
 @property (nonatomic, assign) BOOL hideLandscapeStatusBar;          // 横屏状态栏是否显示 |
 /** 是否显示导航栏菜单按钮，默认为不隐藏*/
 @property (nonatomic, assign) BOOL hideNavMenuBarButton;            // 导航栏菜单按钮
+/** 网页是否可以回弹，默认为YES*/
+@property (nonatomic, assign) BOOL webBounces;                      // 网页是否可以回弹
 /** 导航栏返回按钮图片*/
 @property (nonatomic, strong) UIImage *navBackButtonImage;          // 导航栏返回按钮图片
+/** 导航栏返回按钮标题*/
+@property (nonatomic, strong) NSString *navBackButtonTitle;         // 导航栏返回按钮标题
 /** 导航栏按钮字体样式*/
 @property (nonatomic, strong) UIFont  *navButtonTitleFont;          // 导航栏按钮字体大小
 /** 导航栏按钮颜色(图片，标题)*/

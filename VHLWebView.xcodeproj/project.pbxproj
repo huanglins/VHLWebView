@@ -62,7 +62,11 @@
 		BF700B4F1D6D67F20028F3D8 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = BF700B4E1D6D67F20028F3D8 /* Assets.xcassets */; };
 		BF700B521D6D67F20028F3D8 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = BF700B501D6D67F20028F3D8 /* LaunchScreen.storyboard */; };
 		BF700B5D1D6D67F30028F3D8 /* VHLWebViewTests.m in Sources */ = {isa = PBXBuildFile; fileRef = BF700B5C1D6D67F30028F3D8 /* VHLWebViewTests.m */; };
-		BF8B05BF1ED922EF008FAEDD /* TowViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF8B05BE1ED922EF008FAEDD /* TowViewController.m */; };
+		BF7209FF1F4EA7B500298C51 /* TestViewController1.m in Sources */ = {isa = PBXBuildFile; fileRef = BF7209FE1F4EA7B500298C51 /* TestViewController1.m */; };
+		BF720A021F4EACFB00298C51 /* TestViewController2.m in Sources */ = {isa = PBXBuildFile; fileRef = BF720A011F4EACFB00298C51 /* TestViewController2.m */; };
+		BF720A051F4EB08E00298C51 /* BaseViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = BF720A041F4EB08E00298C51 /* BaseViewController.m */; };
+		BF720A081F4EB2FE00298C51 /* BaseNavigationC.m in Sources */ = {isa = PBXBuildFile; fileRef = BF720A071F4EB2FE00298C51 /* BaseNavigationC.m */; };
+		BFC970E11F4D5BB3002F9FBC /* VHLNavigation.m in Sources */ = {isa = PBXBuildFile; fileRef = BFC970E01F4D5BB3002F9FBC /* VHLNavigation.m */; };
 		BFEAA75C1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA75B1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m */; };
 		BFEAA75F1F035E520094DCD4 /* NSURLProtocol+WKWebView.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA75E1F035E510094DCD4 /* NSURLProtocol+WKWebView.m */; };
 		BFEAA7681F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m in Sources */ = {isa = PBXBuildFile; fileRef = BFEAA7671F03A1F20094DCD4 /* UIImage+VHLWebQRCode.m */; };
@@ -165,8 +169,16 @@
 		BF700B581D6D67F30028F3D8 /* VHLWebViewTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = VHLWebViewTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		BF700B5C1D6D67F30028F3D8 /* VHLWebViewTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VHLWebViewTests.m; sourceTree = "<group>"; };
 		BF700B5E1D6D67F30028F3D8 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		BF8B05BD1ED922EF008FAEDD /* TowViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TowViewController.h; sourceTree = "<group>"; };
-		BF8B05BE1ED922EF008FAEDD /* TowViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TowViewController.m; sourceTree = "<group>"; };
+		BF7209FD1F4EA7B500298C51 /* TestViewController1.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestViewController1.h; sourceTree = "<group>"; };
+		BF7209FE1F4EA7B500298C51 /* TestViewController1.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController1.m; sourceTree = "<group>"; };
+		BF720A001F4EACFB00298C51 /* TestViewController2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = TestViewController2.h; sourceTree = "<group>"; };
+		BF720A011F4EACFB00298C51 /* TestViewController2.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = TestViewController2.m; sourceTree = "<group>"; };
+		BF720A031F4EB08E00298C51 /* BaseViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseViewController.h; sourceTree = "<group>"; };
+		BF720A041F4EB08E00298C51 /* BaseViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseViewController.m; sourceTree = "<group>"; };
+		BF720A061F4EB2FE00298C51 /* BaseNavigationC.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = BaseNavigationC.h; sourceTree = "<group>"; };
+		BF720A071F4EB2FE00298C51 /* BaseNavigationC.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = BaseNavigationC.m; sourceTree = "<group>"; };
+		BFC970DF1F4D5BB3002F9FBC /* VHLNavigation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLNavigation.h; sourceTree = "<group>"; };
+		BFC970E01F4D5BB3002F9FBC /* VHLNavigation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLNavigation.m; sourceTree = "<group>"; };
 		BFEAA75A1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VHLWebViewNSURLProtocol.h; sourceTree = "<group>"; };
 		BFEAA75B1F035DB80094DCD4 /* VHLWebViewNSURLProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = VHLWebViewNSURLProtocol.m; sourceTree = "<group>"; };
 		BFEAA75D1F035E510094DCD4 /* NSURLProtocol+WKWebView.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "NSURLProtocol+WKWebView.h"; sourceTree = "<group>"; };
@@ -404,13 +416,19 @@
 		BF700B411D6D67F20028F3D8 /* VHLWebView */ = {
 			isa = PBXGroup;
 			children = (
-				BFC95F821EED000300425B97 /* UINavigationController */,
+				BFC970DE1F4D5BA3002F9FBC /* VHLNavigation */,
 				BF085D7E1EFA495700C935CA /* VHLWebView */,
 				BF700B481D6D67F20028F3D8 /* ViewController.h */,
 				BF700B491D6D67F20028F3D8 /* ViewController.m */,
 				BF4971881EE7AC3100EB868E /* post_data */,
-				BF8B05BD1ED922EF008FAEDD /* TowViewController.h */,
-				BF8B05BE1ED922EF008FAEDD /* TowViewController.m */,
+				BF720A061F4EB2FE00298C51 /* BaseNavigationC.h */,
+				BF720A071F4EB2FE00298C51 /* BaseNavigationC.m */,
+				BF720A031F4EB08E00298C51 /* BaseViewController.h */,
+				BF720A041F4EB08E00298C51 /* BaseViewController.m */,
+				BF7209FD1F4EA7B500298C51 /* TestViewController1.h */,
+				BF7209FE1F4EA7B500298C51 /* TestViewController1.m */,
+				BF720A001F4EACFB00298C51 /* TestViewController2.h */,
+				BF720A011F4EACFB00298C51 /* TestViewController2.m */,
 				BF700B451D6D67F20028F3D8 /* AppDelegate.h */,
 				BF700B461D6D67F20028F3D8 /* AppDelegate.m */,
 				BF700B4B1D6D67F20028F3D8 /* Main.storyboard */,
@@ -439,11 +457,13 @@
 			path = VHLWebViewTests;
 			sourceTree = "<group>";
 		};
-		BFC95F821EED000300425B97 /* UINavigationController */ = {
+		BFC970DE1F4D5BA3002F9FBC /* VHLNavigation */ = {
 			isa = PBXGroup;
 			children = (
+				BFC970DF1F4D5BB3002F9FBC /* VHLNavigation.h */,
+				BFC970E01F4D5BB3002F9FBC /* VHLNavigation.m */,
 			);
-			path = UINavigationController;
+			path = VHLNavigation;
 			sourceTree = "<group>";
 		};
 		BFEAA7591F035D7A0094DCD4 /* VHLNSURLProtocol */ = {
@@ -654,7 +674,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				BF085DF31EFA495700C935CA /* VHLWebViewShareView.m in Sources */,
+				BF720A021F4EACFB00298C51 /* TestViewController2.m in Sources */,
 				BF700B4A1D6D67F20028F3D8 /* ViewController.m in Sources */,
+				BFC970E11F4D5BB3002F9FBC /* VHLNavigation.m in Sources */,
 				BF085DD81EFA495700C935CA /* VHLWebViewChangeFontSliderView.m in Sources */,
 				BF085DCB1EFA495700C935CA /* WebViewJavascriptBridge.m in Sources */,
 				BF085DF01EFA495700C935CA /* VHLWebViewShareItemCell.m in Sources */,
@@ -663,11 +685,14 @@
 				BF595BE61F00EDD100FBD52F /* VHLWebViewJSBridgeHandle.m in Sources */,
 				BF085DC91EFA495700C935CA /* OpenShare+Weixin.m in Sources */,
 				BF085DCA1EFA495700C935CA /* OpenShare.m in Sources */,
+				BF720A081F4EB2FE00298C51 /* BaseNavigationC.m in Sources */,
 				BF085DCE1EFA495700C935CA /* WKWebViewJavascriptBridge.m in Sources */,
+				BF7209FF1F4EA7B500298C51 /* TestViewController1.m in Sources */,
 				BF595BE71F00EDD100FBD52F /* VHLWebViewRouteHandle.m in Sources */,
 				BF085DD91EFA495700C935CA /* VHLWebViewChangeFontView.m in Sources */,
 				BF085DCD1EFA495700C935CA /* WebViewJavascriptBridgeBase.m in Sources */,
 				BF595BD81F00DE1F00FBD52F /* VHLActionSheet.m in Sources */,
+				BF720A051F4EB08E00298C51 /* BaseViewController.m in Sources */,
 				BFEAA75F1F035E520094DCD4 /* NSURLProtocol+WKWebView.m in Sources */,
 				BFEAA76E1F03A24A0094DCD4 /* NSData+VHLWebDataType.m in Sources */,
 				BF085DD61EFA495700C935CA /* VHLPopNavigationController.m in Sources */,
@@ -678,7 +703,6 @@
 				BF085DF21EFA495700C935CA /* VHLWebViewShareSpaceView.m in Sources */,
 				BF085DEF1EFA495700C935CA /* VHLWebViewShareItem.m in Sources */,
 				BF700B471D6D67F20028F3D8 /* AppDelegate.m in Sources */,
-				BF8B05BF1ED922EF008FAEDD /* TowViewController.m in Sources */,
 				BF700B441D6D67F20028F3D8 /* main.m in Sources */,
 				BF085DF11EFA495700C935CA /* VHLWebViewShareSpaceCell.m in Sources */,
 				BF085DDA1EFA495700C935CA /* VHLWebViewController.m in Sources */,

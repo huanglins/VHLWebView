@@ -36,6 +36,7 @@
 }
 - (instancetype)initWithItemsArray:(NSArray *)array {
     if (self = [super init]) {
+        self.userInteractionEnabled = YES;
         [self.shareSpaceView.dataArray addObjectsFromArray:array];
     }
     return self;
@@ -64,8 +65,6 @@
     
     CGRect frame = self.shareSpaceView.frame;
     frame.origin.y = VHL_SCREEN_HEIGTH - self.shareSpaceView.shareSpaceHeight;
-    
-    //
     self.shareSpaceView.frame = frame;
     [self.shareSpaceView layoutSubviews];
 }
