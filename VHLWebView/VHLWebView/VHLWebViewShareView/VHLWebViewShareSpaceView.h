@@ -15,7 +15,7 @@
 
 @property (nonatomic, strong) NSMutableArray *dataArray;
 
-@property (nonatomic, copy) void (^cancelBlock)();
+@property (nonatomic, copy) void (^cancelBlock)(void);
 
 - (CGFloat)shareSpaceHeight;
 - (CGFloat)initialHeight;

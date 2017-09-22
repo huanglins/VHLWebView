@@ -55,12 +55,19 @@ NS_ASSUME_NONNULL_BEGIN
 /** 导航栏按钮字体样式*/
 @property (nonatomic, strong) UIFont  *navButtonTitleFont;          // 导航栏按钮字体大小
 /** 导航栏按钮颜色(图片，标题)*/
-@property (nonatomic, strong) UIColor *navTitleColor;               // 导航栏按钮颜色(图片，标题)
+@property (nonatomic, strong) UIColor *navButtonTitleColor;         // 导航栏按钮颜色(图片，标题)
+
+/** 是否全屏显示，从导航栏顶部开始。默认NO - 不全屏显示*/
+@property (nonatomic, assign, getter=isFullScreenDisplay) BOOL fullScreenDisplay;
+/** 全屏网页 - 导航栏按钮颜色(图片，标题)。默认为白色 */
+@property (nonatomic, strong) UIColor *fnNavButtonTitleColor;       // 导航栏按钮颜色(图片，标题)
 
 /** 是否隐藏网页来源lable，默认NO - 显示*/
 @property (nonatomic, assign) BOOL hideSourceLabel;                 // 网页来源lable是否显示
 /** 网页来源字体颜色，默认为浅灰色*/
 @property (nonatomic, strong) UIColor *sourceLabelColor;            // 网页来源lable字体颜色
+/** 是否隐藏网络进度条。默认NO - 不隐藏*/
+@property (nonatomic, assign) BOOL hideWebProgress;
 /** 网页进度条颜色*/
 @property (nonatomic, strong) UIColor *progressTintColor;           // 进度条颜色
 /** 网页背景层颜色*/

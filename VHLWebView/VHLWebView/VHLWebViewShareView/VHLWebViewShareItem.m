@@ -12,7 +12,7 @@
 
 + (instancetype)itemWithTitle:(NSString *)title
                          icon:(NSString *)icon
-                      handler:(void (^)())handler
+                      handler:(void (^)(void))handler
 {
     VHLWebViewShareItem *item = [[VHLWebViewShareItem alloc] init];
     item.title = title;

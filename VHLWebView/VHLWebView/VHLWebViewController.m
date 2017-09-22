@@ -10,6 +10,8 @@
 // System
 #import <objc/runtime.h>
 #import <MessageUI/MessageUI.h>     // 邮件
+// Navigation
+#import "VHLNavigation.h"
 // NSURLProtocol
 #import "VHLWebViewNSURLProtocol.h"
 // Category
@@ -122,6 +124,7 @@
 @property (nonatomic, strong) UIBarButtonItem *navBackBarButtonItem;            // 左边返回导航栏按钮
 @property (nonatomic, strong) UIBarButtonItem *navCloseBarButtonItem;           // 左边关闭导航栏按钮
 @property (nonatomic, strong) UIBarButtonItem *navMenuBarButtonItem;            // 右边菜单按钮
+@property (nonatomic, strong) UIColor *navButtonDrawColor;                      // 按钮颜色
 
 @property (nonatomic, strong) UILabel *backgroundLabel;                         // 显示 - 网页有 *** 提供
 @property (nonatomic, strong) NSTimer *updating;                                // 定时器
@@ -196,7 +199,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 {
     if (self = [self init]) {
         _webTitle = title;
-        self.navigationItem.title = _webTitle;
+        self.title = _webTitle;
         
         _HTMLString = [[NSString alloc] initWithContentsOfFile:kVHLPOSTHTMLPath encoding:NSUTF8StringEncoding error:nil];
         _baseURL = [[NSBundle mainBundle] bundleURL];
@@ -222,19 +225,24 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 #pragma mark - 0---------------------------------------------------------------0
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.view.backgroundColor = [UIColor whiteColor];
+    [self.navigationController.navigationBar setShadowImage:[UIImage new]];
     
     if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
-        self.edgesForExtendedLayout = UIRectEdgeNone;
+        self.edgesForExtendedLayout = _fullScreenDisplay?UIRectEdgeAll:UIRectEdgeNone;
     }
-    self.automaticallyAdjustsScrollViewInsets = YES;                        // 自动调整 inset
+    self.automaticallyAdjustsScrollViewInsets = YES;                            // 是否自动调整 inset
     self.extendedLayoutIncludesOpaqueBars = YES;
     
-    self.view.backgroundColor = [UIColor whiteColor];
-    // 隐藏导航栏分割线
-    //[self.navigationController.navigationBar setShadowImage:[UIImage new]];
-    
+    /** 网页全屏初始化*/
+    if (_fullScreenDisplay) {
+        self.navButtonDrawColor = self.fnNavButtonTitleColor?:[UIColor whiteColor];
+        [self vhl_setNavBarBackgroundAlpha:0.0];
+        [self vhl_setNavBarTitleColor:[UIColor whiteColor]];
+        [self vhl_setStatusBarStyle:UIStatusBarStyleLightContent];
+    }
     [self setupSubviews];
-    
+    // ---------------------------------------------------------------------------------------------
     if (_URL) {
         [self loadURL:_URL];
     } else if (_HTMLString && _baseURL) {
@@ -263,17 +271,22 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
     
-    if (self.navigationController) {
+    if (!_hideWebProgress) {
         [self updateFrameOfProgressView];
-        [self.navigationController.navigationBar addSubview:self.progressView];
+        if (_fullScreenDisplay) {
+            [self.view addSubview:self.progressView];
+        } else if(self.navigationController){
+            [self.navigationController.navigationBar addSubview:self.progressView];
+        }
     }
     // 模态跳转
     if (self.navigationController && [self.navigationController isBeingPresented]) {
         UIBarButtonItem *doneButton = [[UIBarButtonItem alloc] initWithBarButtonSystemItem:UIBarButtonSystemItemDone target:self action:@selector(doneButtonClicked:)];
-        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad)
+        if (UI_USER_INTERFACE_IDIOM() == UIUserInterfaceIdiomPad) {
             self.navigationItem.leftBarButtonItem = doneButton;
-        else
+        } else {
             self.navigationItem.rightBarButtonItem = doneButton;
+        }
         _doneItem = doneButton;
     }
 }
@@ -290,10 +303,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)viewWillDisappear:(BOOL)animated {
     [super viewWillDisappear:animated];
     self.navigationController.interactivePopGestureRecognizer.enabled = YES;
-    
     // 移除网页进度条
-    if (self.navigationController) {
-        [_progressView removeFromSuperview];
+    if (self.progressView) {
+        [self.progressView removeFromSuperview];
+        self.progressView = nil;
     }
     // 移除屏幕旋转通知通知
     UIDevice *device = [UIDevice currentDevice];
@@ -344,15 +357,20 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary<NSString *,id> *)change context:(void *)context {
     // 监听网页加载进度
     if ([keyPath isEqualToString:@"estimatedProgress"]) {
-        if (self.navigationController && self.progressView.superview != self.navigationController.navigationBar) {
-            [self updateFrameOfProgressView];
-            [self.navigationController.navigationBar addSubview:self.progressView];
-        }
-        float progress = [[change objectForKey:NSKeyValueChangeNewKey] floatValue];
-        if (progress >= _progressView.progress) {
-            [_progressView setProgress:progress animated:YES];
-        } else {
-            [_progressView setProgress:progress animated:NO];
+        if (!_hideWebProgress) {        // 没有隐藏进度条
+            if (!_fullScreenDisplay && self.navigationController && self.progressView.superview != self.navigationController.navigationBar) {
+                [self updateFrameOfProgressView];
+                [self.navigationController.navigationBar addSubview:self.progressView];
+            } else if (_fullScreenDisplay && self.progressView.superview != self.view) {
+                [self updateFrameOfProgressView];
+                [self.view addSubview:self.progressView];
+            }
+            float progress = [[change objectForKey:NSKeyValueChangeNewKey] floatValue];
+            if (progress >= _progressView.progress) {
+                [_progressView setProgress:progress animated:YES];
+            } else {
+                [_progressView setProgress:progress animated:NO];
+            }
         }
     } else {
         [super observeValueForKeyPath:keyPath ofObject:object change:change context:context];
@@ -380,7 +398,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 - (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title{
     _webTitle = title;
-    self.navigationItem.title = _webTitle;
+    self.title = _webTitle;
     
     _HTMLString = [[NSString alloc] initWithContentsOfFile:kVHLPOSTHTMLPath encoding:NSUTF8StringEncoding error:nil];
     _baseURL = [[NSBundle mainBundle] bundleURL];
@@ -607,14 +625,34 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
 }
 #endif
-#pragma mark - UIScrollViewDelegate
+#pragma mark - UIScrollViewDelegate ----------------------------------------------------------------
 - (void)scrollViewDidScroll:(UIScrollView *)scrollView {
+    // 网页背景颜色，不然 sourceLabel无法显示
     if (scrollView == self.webView.scrollView &&
         scrollView.contentOffset.x == 0 &&
         scrollView.contentOffset.y < 0) {
         scrollView.backgroundColor = [UIColor clearColor];
-    } else {
-        
+    }
+    // 导航栏背景样式
+    if (_fullScreenDisplay) {
+        CGFloat offsetY = scrollView.contentOffset.y;
+        CGFloat alpha = (offsetY - 20) / [self navigationBarAndStatusBarHeight];
+        [self vhl_setNavBarBackgroundAlpha:alpha];
+        if (alpha > 0.5) {
+            if (self.navButtonDrawColor != self.navButtonTitleColor) {
+                self.navButtonDrawColor = self.navButtonTitleColor;
+                [self updateNavigationItems];
+            }
+            [self vhl_setNavBarTitleColor:[UIColor blackColor]];
+            [self vhl_setStatusBarStyle:UIStatusBarStyleDefault];
+        } else {
+            if (self.navButtonDrawColor != (self.fnNavButtonTitleColor?:[UIColor whiteColor])) {
+                self.navButtonDrawColor = (self.fnNavButtonTitleColor?:[UIColor whiteColor]);
+                [self updateNavigationItems];
+            }
+            [self vhl_setNavBarTitleColor:[UIColor whiteColor]];
+            [self vhl_setStatusBarStyle:UIStatusBarStyleLightContent];
+        }
     }
 }
 // UIScrollView -
@@ -779,9 +817,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         title = [_webView title]?:@"";
         
         if ([title isEqualToString:@""]) {
-            self.navigationItem.title = _webTitle?:@"";
+            self.title = _webTitle?:@"";
         } else {
-            self.navigationItem.title = title;
+            self.title = title;
         }
         NSDictionary *infoDictionary = [[NSBundle mainBundle] infoDictionary];
         NSString *bundle = ([infoDictionary objectForKey:@"CFBundleDisplayName"]?:[infoDictionary objectForKey:@"CFBundleName"])?:[infoDictionary objectForKey:@"CFBundleIdentifier"];
@@ -931,6 +969,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     CGFloat progressBarHeight = 2.0f;
     CGRect navigationBarBounds = self.navigationController.navigationBar.bounds;
     CGRect barFrame = CGRectMake(0, navigationBarBounds.size.height - progressBarHeight, navigationBarBounds.size.width, progressBarHeight);
+    if (_fullScreenDisplay) {     // 如果全屏显示，从最顶部开始
+        barFrame = CGRectMake(0, 0, navigationBarBounds.size.width, progressBarHeight);
+    }
     _progressView = [[UIProgressView alloc] initWithFrame:barFrame];
     _progressView.trackTintColor = [UIColor clearColor];
     _progressView.progressTintColor = self.progressTintColor?:self.navigationController.navigationBar.tintColor;
@@ -953,10 +994,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 // GET - 导航栏 [返回] 按钮
 - (UIBarButtonItem *)navBackBarButtonItem {
-    if (_navBackBarButtonItem) return _navBackBarButtonItem;
+    //if (_navBackBarButtonItem) return _navBackBarButtonItem;
     // UIImageRenderingModeAlwaysTemplate 模式，图片根据 tint color
     UIImage* backItemImage = self.navBackButtonImage?:([[[UINavigationBar appearance] backIndicatorImage] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate]?:[[UIImage imageNamed:@"vhl_nav_back"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate]);
-    if (self.navTitleColor) {
+    if (self.navButtonDrawColor) {
         UIGraphicsBeginImageContextWithOptions(backItemImage.size, NO, backItemImage.scale);
         CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextTranslateCTM(context, 0, backItemImage.size.height);
@@ -964,7 +1005,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         CGContextSetBlendMode(context, kCGBlendModeNormal);
         CGRect rect = CGRectMake(0, 0, backItemImage.size.width, backItemImage.size.height);
         CGContextClipToMask(context, rect, backItemImage.CGImage);
-        [self.navTitleColor setFill];
+        [self.navButtonDrawColor setFill];
         CGContextFillRect(context, rect);
         UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
@@ -979,8 +1020,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     CGContextSetBlendMode(context, kCGBlendModeNormal);
     CGRect rect = CGRectMake(0, 0, backItemImage.size.width, backItemImage.size.height);
     CGContextClipToMask(context, rect, backItemImage.CGImage);
-    if (self.navTitleColor) {
-        [[self.navTitleColor colorWithAlphaComponent:0.5] setFill];
+    if (self.navButtonDrawColor) {
+        [[self.navButtonDrawColor colorWithAlphaComponent:0.5] setFill];
     } else {
         [[self.navigationController.navigationBar.tintColor colorWithAlphaComponent:0.5] setFill];
     }
@@ -995,7 +1036,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [backButton setImage:backItemImage forState:UIControlStateNormal];
     [backButton setImage:backItemHlImage forState:UIControlStateHighlighted];
     // 按钮字体颜色
-    UIColor *titleColor = self.navTitleColor?:self.navigationController.navigationBar.tintColor;
+    UIColor *titleColor = self.navButtonDrawColor?:self.navigationController.navigationBar.tintColor;
     [backButton setTitleColor:titleColor forState:UIControlStateNormal];
     [backButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
     // 按钮字体样式
@@ -1014,12 +1055,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 // GET - 导航栏 [关闭] 按钮
 - (UIBarButtonItem *)navCloseBarButtonItem{
-    if (_navCloseBarButtonItem) return _navCloseBarButtonItem;
+    //if (_navCloseBarButtonItem) return _navCloseBarButtonItem;
     if (self.navigationItem.rightBarButtonItem == _doneItem && self.navigationItem.rightBarButtonItem != nil) {
         UIButton *closeButton = [[UIButton alloc] init];
         [closeButton setTitle:@"关闭" forState:UIControlStateNormal];
         closeButton.titleLabel.font = self.navButtonTitleFont?:(self.navigationController.navigationBar.titleTextAttributes[NSFontAttributeName]?:[UIFont systemFontOfSize:16]);
-        UIColor *titleColor = self.navTitleColor?:self.navigationController.navigationBar.tintColor;
+        UIColor *titleColor = self.navButtonDrawColor?:self.navigationController.navigationBar.tintColor;
         [closeButton setTitleColor:titleColor forState:UIControlStateNormal];
         [closeButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
         [closeButton addTarget:self action:@selector(doneButtonClicked:) forControlEvents:UIControlEventTouchUpInside];
@@ -1031,7 +1072,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         UIButton *closeButton = [[UIButton alloc] init];
         [closeButton setTitle:@"关闭" forState:UIControlStateNormal];
         closeButton.titleLabel.font = self.navButtonTitleFont?:(self.navigationController.navigationBar.titleTextAttributes[NSFontAttributeName]?:[UIFont systemFontOfSize:16]);
-        UIColor *titleColor = self.navTitleColor?:self.navigationController.navigationBar.tintColor;
+        UIColor *titleColor = self.navButtonDrawColor?:self.navigationController.navigationBar.tintColor;
         [closeButton setTitleColor:titleColor forState:UIControlStateNormal];
         [closeButton setTitleColor:[titleColor colorWithAlphaComponent:0.5] forState:UIControlStateHighlighted];
         [closeButton addTarget:self action:@selector(navigationIemHandleClose:) forControlEvents:UIControlEventTouchUpInside];
@@ -1044,10 +1085,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 // GET - 导航栏 [菜单] 按钮
 - (UIBarButtonItem *)navMenuBarButtonItem {
-    if (_navMenuBarButtonItem) return _navMenuBarButtonItem;
-    
+    //if (_navMenuBarButtonItem) return _navMenuBarButtonItem;
     UIImage *menuItemImage = [[UIImage imageNamed:@"vhl_nav_menu"] imageWithRenderingMode:UIImageRenderingModeAlwaysTemplate];
-    if (self.navTitleColor) {
+    if (self.navButtonDrawColor) {
         UIGraphicsBeginImageContextWithOptions(menuItemImage.size, NO, menuItemImage.scale);
         CGContextRef context = UIGraphicsGetCurrentContext();
         CGContextTranslateCTM(context, 0, menuItemImage.size.height);
@@ -1055,7 +1095,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         CGContextSetBlendMode(context, kCGBlendModeNormal);
         CGRect rect = CGRectMake(0, 0, menuItemImage.size.width, menuItemImage.size.height);
         CGContextClipToMask(context, rect, menuItemImage.CGImage);
-        [self.navTitleColor setFill];
+        [self.navButtonDrawColor setFill];
         CGContextFillRect(context, rect);
         UIImage *newImage = UIGraphicsGetImageFromCurrentImageContext();
         UIGraphicsEndImageContext();
@@ -1069,8 +1109,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     CGContextSetBlendMode(context, kCGBlendModeNormal);
     CGRect rect = CGRectMake(0, 0, menuItemImage.size.width, menuItemImage.size.height);
     CGContextClipToMask(context, rect, menuItemImage.CGImage);
-    if (self.navTitleColor) {
-        [[self.navTitleColor colorWithAlphaComponent:0.5] setFill];
+    if (self.navButtonDrawColor) {
+        [[self.navButtonDrawColor colorWithAlphaComponent:0.5] setFill];
     } else {
         [[self.navigationController.navigationBar.tintColor colorWithAlphaComponent:0.5] setFill];
     }
@@ -1108,15 +1148,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     UIView *contentView = _webView;//.subviews.lastObject;
     [contentView addSubview:self.backgroundLabel];
     [contentView sendSubviewToBack:self.backgroundLabel];
+    self.backgroundLabel.hidden = _hideSourceLabel;
     
     [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
     [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
     [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
-    
-    // 进度条 progress view
-    self.progressView.frame = CGRectMake(0, 0, CGRectGetWidth(self.view.frame), 2);
-    [self.view addSubview:self.progressView];
-    [self.view bringSubviewToFront:self.progressView];
     
     // - ** JS 交互框架 ** -
     [WKWebViewJavascriptBridge enableLogging];
@@ -1392,6 +1428,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     CGFloat progressBarHeight = 2.0f;
     CGRect navigationBarBounds = self.navigationController.navigationBar.bounds;
     CGRect barFrame = CGRectMake(0, navigationBarBounds.size.height - progressBarHeight, navigationBarBounds.size.width, progressBarHeight);
+    if (_fullScreenDisplay) {
+        barFrame = CGRectMake(0.0, 0.0, navigationBarBounds.size.width, progressBarHeight);
+    }
     _progressView.frame = barFrame;
 }
 // Helper - 默认进度修改

@@ -21,7 +21,7 @@
     [super viewDidLoad];
     self.title = @"隐藏导航栏2";
     self.view.backgroundColor = [UIColor whiteColor];
-    [self vhl_setNavBarBarTintColor:[UIColor colorWithRed:0.21 green:0.56 blue:0.86 alpha:1.00]];
+    [self vhl_setNavBackgroundColor:[UIColor colorWithRed:0.21 green:0.56 blue:0.86 alpha:1.00]];
     //[self vhl_setNavigationSwitchStyle:VHLNavigationSwitchStyleFakeNavigationBar];
     [self vhl_setNavBarBackgroundImage:[UIImage imageNamed:@"imageNav"]];  // millcolorGrad
     //[self vhl_setNavBarBackgroundAlpha:0.f];
