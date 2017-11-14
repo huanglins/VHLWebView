@@ -7,6 +7,8 @@
 //
 
 #import <Foundation/Foundation.h>
+#import <UIKit/UIKit.h>
+
 #if (__MAC_OS_X_VERSION_MAX_ALLOWED > __MAC_10_9 || __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_7_1)
 #define supportsWKWebKit
 #endif
@@ -15,11 +17,11 @@
 #import "WKWebViewJavascriptBridge.h"
 
 /**
- *  JavascriptBridge - 处理与JS交互
+ *  通过 JavascriptBridge 进行原生交互。
  */
 @interface VHLWebViewJSBridgeHandle : NSObject
 
-- (instancetype)initWithVC:(UIViewController *)viewController jsBridge:(WKWebViewJavascriptBridge *)bridge;
+- (instancetype)initWithVC:(UIViewController *)viewController jsBridge:(WKWebViewJavascriptBridge *)bridge webView:(WKWebView *)webview;
 
 /*
  *  系统相关功能的 JS/Native 交互

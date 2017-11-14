@@ -12,17 +12,13 @@
 @interface UIColor (VHLNavigation)
 
 /** 全局设置导航栏背景颜色 */
-+ (void)wr_setDefaultNavBackgroundColor:(UIColor *)color;
-
++ (void)vhl_setDefaultNavBackgroundColor:(UIColor *)color;
 /** 全局设置导航栏按钮颜色 */
 + (void)vhl_setDefaultNavBarTintColor:(UIColor *)color;
-
 /** 全局设置导航栏标题颜色 */
 + (void)vhl_setDefaultNavBarTitleColor:(UIColor *)color;
-
 /** 全局设置导航栏黑色分割线是否隐藏*/
 + (void)vhl_setDefaultNavBarShadowImageHidden:(BOOL)hidden;
-
 /** 全局设置状态栏样式*/
 + (void)vhl_setDefaultStatusBarStyle:(UIStatusBarStyle)style;
 
@@ -37,6 +33,8 @@
 - (void)vhl_setBackgroundColor:(UIColor *)color;
 /** 设置当前 NavigationBar 背景透明度*/
 - (void)vhl_setBackgroundAlpha:(CGFloat)alpha;
+/** 设置当前 NavigationBar 底部分割线是否隐藏*/
+- (void)vhl_setShadowImageHidden:(BOOL)hidden;
 /** 设置导航栏所有 barButtonItem 的透明度*/
 - (void)vhl_setBarButtonItemsAlpha:(CGFloat)alpha hasSystemBackIndicator:(BOOL)hasSystemBackIndicator;
 
@@ -56,7 +54,7 @@ typedef NS_ENUM(NSInteger, VHLNavigationSwitchStyle) {
 /** UIViewController 导航栏扩展 */
 @interface UIViewController (VHLNavigation)
 
-/** 设置当前导航栏侧滑过度效果*/
+/** 设置当前导航栏侧滑过渡效果*/
 - (void)vhl_setNavigationSwitchStyle:(VHLNavigationSwitchStyle)style;
 - (VHLNavigationSwitchStyle)vhl_navigationSwitchStyle;
 
@@ -88,14 +86,26 @@ typedef NS_ENUM(NSInteger, VHLNavigationSwitchStyle) {
 - (void)vhl_setNavBarShadowImageHidden:(BOOL)hidden;
 - (BOOL)vhl_navBarShadowImageHidden;
 
+/** 设置当前导航栏向上的偏移量(浮动导航栏) 默认0不偏移，(0到44之间，顶部露出状态栏，其他情况不好看)*/
+- (void)vhl_setNavBarTranslationY:(CGFloat)translationY;
+- (CGFloat)vhl_navBarTranslationY;
+
 /** 设置当前状态栏样式 白色/黑色，也可以直接重写 preferredStatusBarStyle */
 - (void)vhl_setStatusBarStyle:(UIStatusBarStyle)style;
 - (UIStatusBarStyle)vhl_statusBarStyle;
 
-/** 获取导航栏加状态栏高度*/
-- (CGFloat)navigationBarAndStatusBarHeight;
+/** 获取当前导航栏高度*/
+- (CGFloat)vhl_navgationBarHeight;
+/** 获取当前导航栏加状态栏高度*/
+- (CGFloat)vhl_navigationBarAndStatusBarHeight;
 
 @end
+
+/**
+     移动导航栏 / 隐藏系统返回按钮
+     [self.navigationController.navigationBar vhl_setTranslationY:(-navBarHeight * progress)];
+     [self.navigationController.navigationBar vhl_setBarButtonItemsAlpha:(1 - progress) hasSystemBackIndicator:YES];
+ */
 
 /*
  // 默认不支持旋转 - 支持设备自动旋转
@@ -111,6 +121,7 @@ typedef NS_ENUM(NSInteger, VHLNavigationSwitchStyle) {
      return YES;
  }
  */
+
 /*
     associated 关联的
  */

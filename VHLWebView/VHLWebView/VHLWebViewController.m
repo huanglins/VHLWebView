@@ -32,8 +32,9 @@
 #import "VHLWebViewJSBridgeHandle.h"
 #import "VHLWebViewEvaluateJSHandle.h"
 
-
 #define VHLWEB_IOS_VERSION [[[UIDevice currentDevice] systemVersion] floatValue]
+#define VHLWebView_iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? \
+CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
 
 // -----------------------------------------------------------------------------
 // 定义一个进度的扩展
@@ -169,6 +170,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     if (self = [super init]) {
         self.webBounces = YES;              // 是否回弹
         self.navBackButtonTitle = @"返回";
+        self.navButtonDrawColor = [UIColor whiteColor];
     }
     return self;
 }
@@ -231,7 +233,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     if ([self respondsToSelector:@selector(edgesForExtendedLayout)]) {
         self.edgesForExtendedLayout = _fullScreenDisplay?UIRectEdgeAll:UIRectEdgeNone;
     }
-    self.automaticallyAdjustsScrollViewInsets = YES;                            // 是否自动调整 inset
     self.extendedLayoutIncludesOpaqueBars = YES;
     
     /** 网页全屏初始化*/
@@ -422,8 +423,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [self loadHTMLString:_HTMLString baseURL:_baseURL];
 }
 /** 验证URL是否可用*/
-- (NSURL *)verifyURLavailable:(NSURL *)url
-{
+- (NSURL *)verifyURLavailable:(NSURL *)url {
     // 如果地址没有 scheme，那么补上 http:// ,不然会无法访问
     if (!url.scheme) {
         NSURL *newURL = [NSURL URLWithString:[NSString stringWithFormat:@"%@%@",@"http://",url.absoluteString]];
@@ -432,8 +432,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     return url;
 }
 // 执行JS
-- (void)evaluateJavaScript:(NSString *)js
-{
+- (void)evaluateJavaScript:(NSString *)js {
     [self.webView evaluateJavaScript:js completionHandler:^(id object, NSError * _Nullable error) {
         _didMakePostRequest = NO;
         if (error) {
@@ -594,7 +593,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
     // 全局JS
     {
-        [[VHLWebViewEvaluateJSHandle shareInstance] evaluateJSWebView:webView];
+        [[VHLWebViewEvaluateJSHandle shareInstance] evaluateJSWebView:webView viewController:self];
     }
     [self didFinishLoad];
 }
@@ -631,19 +630,20 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     if (scrollView == self.webView.scrollView &&
         scrollView.contentOffset.x == 0 &&
         scrollView.contentOffset.y < 0) {
+        self.webView.backgroundColor = scrollView.backgroundColor;
         scrollView.backgroundColor = [UIColor clearColor];
     }
     // 导航栏背景样式
     if (_fullScreenDisplay) {
         CGFloat offsetY = scrollView.contentOffset.y;
-        CGFloat alpha = (offsetY - 20) / [self navigationBarAndStatusBarHeight];
+        CGFloat alpha = (offsetY - 20) / [self vhl_navigationBarAndStatusBarHeight];
         [self vhl_setNavBarBackgroundAlpha:alpha];
         if (alpha > 0.5) {
             if (self.navButtonDrawColor != self.navButtonTitleColor) {
                 self.navButtonDrawColor = self.navButtonTitleColor;
                 [self updateNavigationItems];
             }
-            [self vhl_setNavBarTitleColor:[UIColor blackColor]];
+            [self vhl_setNavBarTitleColor:self.fnNavTitleColor?:[UIColor blackColor]];
             [self vhl_setStatusBarStyle:UIStatusBarStyleDefault];
         } else {
             if (self.navButtonDrawColor != (self.fnNavButtonTitleColor?:[UIColor whiteColor])) {
@@ -656,27 +656,23 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
 }
 // UIScrollView -
-- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView
-{
+- (void)scrollViewWillBeginDragging:(UIScrollView *)scrollView {
     scrollView.decelerationRate = UIScrollViewDecelerationRateNormal;
 }
 #pragma mark MFMailComposeViewControllerDelegate   --- 发送邮件的代理
 // Mail - 发送邮件
 - (void)mailComposeController:(MFMailComposeViewController *)controller
           didFinishWithResult:(MFMailComposeResult)result
-                        error:(NSError *)error
-{
+                        error:(NSError *)error {
     [self dismissViewControllerAnimated:YES completion:nil];
 }
 #pragma mark - UIGestureRecognizer Delegate  -- 手势代理
 // Gesture - s
-- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer
-{
+- (BOOL)gestureRecognizer:(UIGestureRecognizer *)gestureRecognizer shouldRecognizeSimultaneouslyWithGestureRecognizer:(UIGestureRecognizer *)otherGestureRecognizer {
     return YES; // 同时响应其他手势
 }
 // Gesture - webview 长按手势
-- (void)handleLongPressWithWebView:(UILongPressGestureRecognizer *)sender
-{
+- (void)handleLongPressWithWebView:(UILongPressGestureRecognizer *)sender {
     if (sender.state != UIGestureRecognizerStateBegan) {
         return;
     }
@@ -791,7 +787,8 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [[UIApplication sharedApplication] setNetworkActivityIndicatorVisible:NO];
     // 修改导航栏按钮
     [self updateNavigationItems];
-    
+    // 网页是否可以回弹，全屏显示就不可以回弹
+    self.webView.scrollView.bounces = !_fullScreenDisplay;
     // 修改当前网页字体
     {
         int scaleValue = 100;
@@ -807,7 +804,6 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
             scaleValue = 130;
         }
         NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
-        
         [self.webView evaluateJavaScript:jsStr completionHandler:nil];
     }
     // 网页背景和网页来源
@@ -828,7 +824,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         
         // 网页背景颜色
         
-        // 延时0.2秒后设置背景颜色，不然闪屏的时候会很突兀
+        // 延时0.2秒后设置背景颜色和来源，不然闪屏的时候会很突兀
         __weak typeof(WKWebView *) weakWebView = _webView;
         __weak typeof(UILabel *) weakBGLable = _backgroundLabel;
         dispatch_time_t delayTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.2/*延迟执行时间*/ * NSEC_PER_SEC));
@@ -870,10 +866,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 #pragma mark - Cookie ----------------------------------------------------------
 // Cookie -
-- (NSString *)readCurrentCookieWith:(NSDictionary*)dic{
+- (NSString *)readCurrentCookieWith:(NSDictionary*)dic {
     if (dic == nil) {
         return nil;
-    }else{
+    } else {
         NSHTTPCookieStorage*cookieJar = [NSHTTPCookieStorage sharedHTTPCookieStorage];
         NSMutableString *cookieString = [[NSMutableString alloc] init];
         for (NSHTTPCookie*cookie in [cookieJar cookies]) {
@@ -939,12 +935,12 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _webView = [[WKWebView alloc] initWithFrame:CGRectZero configuration:config];
     _webView.userInteractionEnabled = YES;
     _webView.allowsBackForwardNavigationGestures = YES;                         // 左划回退
-    #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
+#if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
     if ([_webView respondsToSelector:@selector(setAllowsLinkPreview:)]) {
         _webView.allowsLinkPreview = self.allowsLinkPreview;                    // 3DTouch 预览,Peek 和 Pop
     }
-    #endif
-
+#endif
+    
     _webView.backgroundColor = [UIColor clearColor];
     _webView.scrollView.backgroundColor = [UIColor clearColor];
     _webView.scrollView.bounces = self.webBounces;                              // 是否回弹
@@ -953,6 +949,15 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _webView.UIDelegate = self;
     _webView.navigationDelegate = self;
     _webView.scrollView.delegate = self;
+#ifdef __IPHONE_11_0
+    if ([_webView respondsToSelector:@selector(setContentInsetAdjustmentBehavior:)]) {
+        if (@available(iOS 11.0, *)) {
+            _webView.scrollView.contentInsetAdjustmentBehavior = UIScrollViewContentInsetAdjustmentNever;
+        } else {
+            self.automaticallyAdjustsScrollViewInsets = !_fullScreenDisplay;            // 是否自动调整 inset
+        }
+    }
+#endif
     
     // 添加长按手势
     UILongPressGestureRecognizer *longPress = [[UILongPressGestureRecognizer alloc] initWithTarget:self action:@selector(handleLongPressWithWebView:)];
@@ -1054,7 +1059,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     return _navBackBarButtonItem;
 }
 // GET - 导航栏 [关闭] 按钮
-- (UIBarButtonItem *)navCloseBarButtonItem{
+- (UIBarButtonItem *)navCloseBarButtonItem {
     //if (_navCloseBarButtonItem) return _navCloseBarButtonItem;
     if (self.navigationItem.rightBarButtonItem == _doneItem && self.navigationItem.rightBarButtonItem != nil) {
         UIButton *closeButton = [[UIButton alloc] init];
@@ -1152,7 +1157,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     [contentView addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:[_backgroundLabel(<=width)]" options:0 metrics:@{@"width":@([UIScreen mainScreen].bounds.size.width)} views:NSDictionaryOfVariableBindings(_backgroundLabel)]];
     [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeCenterX relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeCenterX multiplier:1.0 constant:0.0]];
-    [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
+    if (VHLWebView_iPhoneX) {
+        [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:34]];
+    } else {
+        [contentView addConstraint:[NSLayoutConstraint constraintWithItem:_backgroundLabel attribute:NSLayoutAttributeTop relatedBy:NSLayoutRelationEqual toItem:contentView attribute:NSLayoutAttributeTop multiplier:1.0 constant:14]];
+    }
     
     // - ** JS 交互框架 ** -
     [WKWebViewJavascriptBridge enableLogging];
@@ -1160,7 +1169,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     [_bridge setWebViewDelegate:self];
     
     // 处理JS相关操作，监听以及注册事件
-    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge];
+    self.vhlJSBridgeHandle = [[VHLWebViewJSBridgeHandle alloc] initWithVC:self jsBridge:_bridge webView:_webView];
     
     [self.vhlJSBridgeHandle jsSystemHanlde];
     [self.vhlJSBridgeHandle jsCustomHandle];
@@ -1415,6 +1424,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     NSArray *shareItemsArray = @[item0,item1,item2,item3,item4,item5];
     if (!_URL) {        // 如果没有URL，那么就不显示 [在Safari打开]
         shareItemsArray = @[item0,item1,item2,item3,item4];
+    }
+    if (_loading) {     // 如果网页还在加载中，就不显示分享第三方按钮
+        shareItemsArray = @[];
     }
     NSArray *functionItemsArray = @[item11,item12,item13];
     //

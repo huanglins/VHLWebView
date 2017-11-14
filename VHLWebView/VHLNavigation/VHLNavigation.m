@@ -44,7 +44,7 @@ static char kVHLDefaultStatusBarStyleKey;
 }
 // --------------------------------------------------- //
 /** 全局设置导航栏背景颜色 */
-+ (void)wr_setDefaultNavBackgroundColor:(UIColor *)color {
++ (void)vhl_setDefaultNavBackgroundColor:(UIColor *)color {
     objc_setAssociatedObject(self, &kVHLDefaultNavBarBarTintColorKey, color, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 + (UIColor *)defaultNavBackgroundColor {
@@ -118,8 +118,11 @@ static char kVHLBackgroundImageViewKey;
     if (!self.backgroundImageView) {
         // add a image(nil color) to _UIBarBackground make it clear
         [self setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-        self.backgroundImageView = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame))];
-        self.backgroundImageView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;  // ****
+        self.backgroundImageView = [[UIImageView alloc] initWithFrame:self.subviews.firstObject.bounds];
+        self.backgroundImageView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+                                                    UIViewAutoresizingFlexibleTopMargin |
+                                                    UIViewAutoresizingFlexibleWidth |
+                                                    UIViewAutoresizingFlexibleHeight;  // ****
         // _UIBarBackground is first subView for navigationBar
         /** iOS11下导航栏不显示问题 */
         if (self.subviews.count > 0) {
@@ -139,8 +142,11 @@ static char kVHLBackgroundImageViewKey;
     if (!self.backgroundView) {
         // add a image(nil color) to _UIBarBackground make it clear
         [self setBackgroundImage:[UIImage new] forBarMetrics:UIBarMetricsDefault];
-        self.backgroundView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.bounds), CGRectGetHeight(self.bounds) + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame))];
-        self.backgroundView.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;      // ****
+        self.backgroundView = [[UIView alloc] initWithFrame:self.subviews.firstObject.bounds];
+        self.backgroundView.autoresizingMask = UIViewAutoresizingFlexibleBottomMargin |
+                                               UIViewAutoresizingFlexibleTopMargin |
+                                               UIViewAutoresizingFlexibleWidth |
+                                               UIViewAutoresizingFlexibleHeight;  // ****
         // _UIBarBackground is first subView for navigationBar
         /** iOS11下导航栏不显示问题 */
         if (self.subviews.count > 0) {
@@ -157,17 +163,30 @@ static char kVHLBackgroundImageViewKey;
     UIView *barBackgroundView = self.subviews.firstObject;
     barBackgroundView.alpha = alpha;
 
+    if (self.isTranslucent) {
+        if ([barBackgroundView subviews].count > 1) {
+            UIView *backgroundEffectView = [[barBackgroundView subviews] objectAtIndex:1];// UIVisualEffectView
+            if (backgroundEffectView != nil) {
+                backgroundEffectView.alpha = alpha;
+            }
+        }
+    }
+    
     if (@available(iOS 11.0, *)) {  // iOS11 下 UIBarBackground -> UIView/UIImageViwe
         for (UIView *view in self.subviews) {
             if ([NSStringFromClass([view class]) containsString:@"UIbarBackGround"]) {
                 view.alpha = 0;
             }
         }
-        // iOS 下如果不设置 UIBarBackground 下的UIView的透明度，会显示不正常
+        // iOS 下如果不设置 UIBarBackground 下的UIView的透明度，会显示一个白色图层
         if (barBackgroundView.subviews.firstObject) {
             barBackgroundView.subviews.firstObject.alpha = alpha;
         }
     }
+}
+/** 设置当前 NavigationBar 底部分割线是否隐藏*/
+- (void)vhl_setShadowImageHidden:(BOOL)hidden {
+    self.shadowImage = hidden ? [UIImage new] : nil;
 }
 /** 设置导航栏所有 barButtonItem 的透明度*/
 - (void)vhl_setBarButtonItemsAlpha:(CGFloat)alpha hasSystemBackIndicator:(BOOL)hasSystemBackIndicator {
@@ -512,6 +531,7 @@ static char kVHLNavBarBackgroundColorKey;           // 当前导航栏背景颜�
 static char kVHLNavBarTintColorKey;                 // 当前导航栏按钮颜色
 static char kVHLNavBarTitleColorKey;                // 当前导航栏标题颜色
 static char kVHLNavBarShadowImageHiddenKey;         // 当前导航栏底部黑线是否隐藏
+static char kVHLNavBarTranslationYKey;              // 当前导航栏浮动高度Y
 static char kVHLStatusBarStyleKey;                  // 当前导航栏状态栏样式
 
 static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现两种颜色导航栏
@@ -542,12 +562,24 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
         [self setPushToNextVCFinished:NO];
         // 当前导航栏是否隐藏
         [self.navigationController setNavigationBarHidden:[self vhl_navBarHidden] animated:YES];
+        // 恢复导航栏浮动偏移
+        if ([self vhl_navBarTranslationY] > 0) {
+            [self.navigationController.navigationBar vhl_setTranslationY:0.0f];
+            [self.navigationController.navigationBar vhl_setBarButtonItemsAlpha:1.0f hasSystemBackIndicator:YES];
+        }
         // 添加一个假 NavigationBar
         if ([self shouldAddFakeNavigationBar]) {
             [self addFakeNavigationBar];
         }
         // 更新导航栏信息
         if (![self vhl_navBarHidden]) {
+            if (!self.fakeNavigationBar) {
+                if ([self vhl_navBarBackgroundImage]) {
+                    [self.navigationController setNeedsNavigationBarUpdateForBarBackgroundImage:[self vhl_navBarBackgroundImage]];
+                } else {
+                    [self.navigationController setNeedsNavigationBarUpdateForBarTintColor:[self vhl_navBackgroundColor]];
+                }
+            }
             [self.navigationController setNeedsNavigationBarUpdateForTintColor:[self vhl_navBarTintColor]];
             [self.navigationController setNeedsNavigationBarUpdateForTitleColor:[self vhl_navBarTitleColor]];
         }
@@ -559,7 +591,7 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
 - (void)vhl_viewDidAppear:(BOOL)animated {
     if ([self canUpdateNavigationBar]) {
         // 当前导航栏是否隐藏
-        [self.navigationController setNavigationBarHidden:[self vhl_navBarHidden] animated:NO];
+        [self.navigationController setNavigationBarHidden:[self vhl_navBarHidden] animated:YES];
         [self removeFakeNavigationBar];     // 删除 fake NavigationBar
         [self updateNavigationInfo];
     }
@@ -572,6 +604,11 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
         [self setPushToNextVCFinished:YES];
         // 当前导航栏是否隐藏
         [self.navigationController setNavigationBarHidden:[self vhl_navBarHidden] animated:YES];
+        // 恢复导航栏浮动偏移
+        if ([self vhl_navBarTranslationY] > 0) {
+            [self.navigationController.navigationBar vhl_setTranslationY:0.0f];
+            [self.navigationController.navigationBar vhl_setBarButtonItemsAlpha:1.0f hasSystemBackIndicator:YES];
+        }
         // 更新导航栏信息
         if (![self vhl_navBarHidden]) {
             [self.navigationController setNeedsNavigationBarUpdateForTintColor:[self vhl_navBarTintColor]];
@@ -605,6 +642,7 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     [self.navigationController setNeedsNavigationBarUpdateForTitleColor:[self vhl_navBarTitleColor]];
     [self.navigationController setNeedsNavigationBarUpdateForBarBackgroundAlpha:[self vhl_navBarBackgroundAlpha]];
     [self.navigationController setNeedsNavigationBarUpdateForShadowImageHidden:[self vhl_navBarShadowImageHidden]];
+    [self vhl_setNavBarTranslationY:[self vhl_navBarTranslationY]];
 }
 #pragma mark - fake navigation bar ---------------------------------------------
 - (UIViewController *)fromVC {
@@ -620,6 +658,7 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     UIViewController *toVC = [self toVC];
     if ((fromVC && ([fromVC vhl_navigationSwitchStyle] == 1 || [fromVC vhl_navBarBackgroundImage])) ||
         (toVC && ([toVC vhl_navigationSwitchStyle] == 1 || [toVC vhl_navBarBackgroundImage])) ||
+        [fromVC vhl_navBarHidden] != [toVC vhl_navBarHidden] ||
         [fromVC vhl_navBarBackgroundAlpha] != [toVC vhl_navBarBackgroundAlpha]) {
         return YES;
     }
@@ -633,8 +672,15 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     [fromVC removeFakeNavigationBar];
     [toVC removeFakeNavigationBar];
     
-    if (!fromVC.fakeNavigationBar) {
-        fromVC.fakeNavigationBar = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.navigationController.navigationBar.bounds) + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame))];
+    if (!fromVC.fakeNavigationBar && ![fromVC vhl_navBarHidden]) {
+        CGRect fakeNavFrame = CGRectMake(0, 0, CGRectGetWidth(self.view.bounds),
+                                         [self vhl_navigationBarAndStatusBarHeight]);
+        if (fromVC.edgesForExtendedLayout == UIRectEdgeNone) {
+            fakeNavFrame = CGRectMake(0, -[self vhl_navigationBarAndStatusBarHeight], CGRectGetWidth(self.view.bounds),
+                                      [self vhl_navigationBarAndStatusBarHeight]);
+        }
+        fromVC.fakeNavigationBar = [[UIImageView alloc] initWithFrame:fakeNavFrame];
+        //fromVC.fakeNavigationBar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         fromVC.fakeNavigationBar.backgroundColor = [fromVC vhl_navBackgroundColor];
         fromVC.fakeNavigationBar.image = [fromVC vhl_navBarBackgroundImage];
         fromVC.fakeNavigationBar.alpha = [fromVC vhl_navBarBackgroundAlpha];
@@ -643,8 +689,15 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
         //
         [fromVC.navigationController setNeedsNavigationBarUpdateForBarBackgroundAlpha:0.0f];
     }
-    if (!toVC.fakeNavigationBar) {
-        toVC.fakeNavigationBar = [[UIImageView alloc] initWithFrame:CGRectMake(0, 0, CGRectGetWidth(self.view.bounds), CGRectGetHeight(self.navigationController.navigationBar.bounds) + CGRectGetHeight([UIApplication sharedApplication].statusBarFrame))];
+    if (!toVC.fakeNavigationBar && ![toVC vhl_navBarHidden]) {
+        CGRect fakeNavFrame = CGRectMake(0, 0, CGRectGetWidth(self.view.bounds),
+                                         [self vhl_navigationBarAndStatusBarHeight]);
+        if (toVC.edgesForExtendedLayout == UIRectEdgeNone) {
+            fakeNavFrame = CGRectMake(0, -[self vhl_navigationBarAndStatusBarHeight], CGRectGetWidth(self.view.bounds),
+                                      [self vhl_navigationBarAndStatusBarHeight]);
+        }
+        toVC.fakeNavigationBar = [[UIImageView alloc] initWithFrame:fakeNavFrame];
+        //toVC.fakeNavigationBar.autoresizingMask = UIViewAutoresizingFlexibleTopMargin | UIViewAutoresizingFlexibleWidth;
         toVC.fakeNavigationBar.backgroundColor = [toVC vhl_navBackgroundColor];
         toVC.fakeNavigationBar.image = [toVC vhl_navBarBackgroundImage];
         toVC.fakeNavigationBar.alpha = [toVC vhl_navBarBackgroundAlpha];
@@ -665,15 +718,13 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
 - (UIImageView *)fakeNavigationBar {
     return (UIImageView *)objc_getAssociatedObject(self, &kVHLFakeNavigationBarKey);
 }
-- (void)setFakeNavigationBar:(UIImageView *)navigationBar
-{
+- (void)setFakeNavigationBar:(UIImageView *)navigationBar {
     objc_setAssociatedObject(self, &kVHLFakeNavigationBarKey, navigationBar, OBJC_ASSOCIATION_RETAIN_NONATOMIC);
 }
 #pragma mark - private method --------------------------------------------------
 - (BOOL)canUpdateNavigationBar {
     // 如果当前有导航栏，且当前是全屏，//且没有手动设置隐藏导航栏
-    if (self.navigationController &&
-        CGRectEqualToRect(self.view.frame, [UIScreen mainScreen].bounds)) {
+    if (self.navigationController) {  //  && CGRectEqualToRect(self.view.frame, [UIScreen mainScreen].bounds)
         return YES;
     }
     return NO;
@@ -765,6 +816,7 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     UIColor *titleColor = (UIColor *)objc_getAssociatedObject(self, &kVHLNavBarTitleColorKey);
     return (titleColor != nil) ? titleColor : [UIColor defaultNavBarTitleColor];
 }
+
 /** 设置当前导航栏 shadowImage(底部分割线)是否隐藏*/
 - (void)vhl_setNavBarShadowImageHidden:(BOOL)hidden {
     objc_setAssociatedObject(self, &kVHLNavBarShadowImageHiddenKey, @(hidden), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
@@ -774,9 +826,23 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     id hidden = objc_getAssociatedObject(self, &kVHLNavBarShadowImageHiddenKey);
     return hidden?[hidden boolValue]:[UIColor defaultNavBarShadowImageHidden];
 }
+
+/** 当前当前导航栏距离顶部的浮动高度*/
+- (void)vhl_setNavBarTranslationY:(CGFloat)translationY {
+    if (translationY <= 0) translationY = 0;
+    if (translationY >= [self vhl_navgationBarHeight]) translationY = [self vhl_navgationBarHeight];
+
+    objc_setAssociatedObject(self, &kVHLNavBarTranslationYKey, @(translationY), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
+    [self.navigationController.navigationBar vhl_setTranslationY:-translationY];
+    [self.navigationController.navigationBar vhl_setBarButtonItemsAlpha:(1.0 - (translationY / [self vhl_navgationBarHeight])) hasSystemBackIndicator:YES];
+}
+- (CGFloat)vhl_navBarTranslationY {
+    id translationY = objc_getAssociatedObject(self, &kVHLNavBarTranslationYKey);
+    return translationY?[translationY floatValue]:0;
+}
+
 /** 设置当前状态栏样式 白色/黑色 */
-- (void)vhl_setStatusBarStyle:(UIStatusBarStyle)style
-{
+- (void)vhl_setStatusBarStyle:(UIStatusBarStyle)style {
     objc_setAssociatedObject(self, &kVHLStatusBarStyleKey, @(style), OBJC_ASSOCIATION_RETAIN_NONATOMIC);
     [self setNeedsStatusBarAppearanceUpdate];       // 调用导航栏的 preferredStatusBarStyle 方法
 }
@@ -788,8 +854,12 @@ static char kVHLFakeNavigationBarKey;               // 假的导航栏，实现�
     return [self vhl_statusBarStyle];
 }
 
+/** 获取当前导航栏高度*/
+- (CGFloat)vhl_navgationBarHeight {
+    return CGRectGetHeight(self.navigationController.navigationBar.bounds);
+}
 /** 获取导航栏加状态栏高度*/
-- (CGFloat)navigationBarAndStatusBarHeight {
+- (CGFloat)vhl_navigationBarAndStatusBarHeight {
     return CGRectGetHeight(self.navigationController.navigationBar.bounds) +
            CGRectGetHeight([UIApplication sharedApplication].statusBarFrame);
 }

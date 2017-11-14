@@ -8,6 +8,7 @@
 
 #import <Foundation/Foundation.h>
 #import <WebKit/WebKit.h>
+#import <UIKit/UIKit.h>
 
 /*
     网页加载完成后需要执行的 JS
@@ -16,6 +17,6 @@
 // 单例
 + (instancetype)shareInstance;
 // 全局的JS执行
-- (void)evaluateJSWebView:(WKWebView *)webview;
+- (void)evaluateJSWebView:(WKWebView *)webview viewController:(UIViewController *)vc;
 
 @end

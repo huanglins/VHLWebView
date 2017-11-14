@@ -7,6 +7,7 @@
 //
 
 #import "VHLWebViewRouteHandle.h"
+#import "VHLNavigation.h"
 
 @interface VHLWebViewRouteHandle()
 
@@ -42,35 +43,30 @@
 - (BOOL)handlePath:(NSURL *)urlPath vc:(VHLWebViewController *)vc webview:(WKWebView *)webview {
     NSString *scheme =  [urlPath.scheme?:@"" lowercaseString];
     NSString *host = urlPath.host?:@"";
-    
     NSString *js = @"";
     
     // 处理拦截的URL
     // 判断是否是系统功能
     if ([@[@"tel", @"sms", @"mailto"] containsObject:scheme]) {
         UIApplication *app = [UIApplication sharedApplication];
-        if ([app canOpenURL:urlPath])
-        {
+        if ([app canOpenURL:urlPath]) {
             [app openURL:urlPath];
             return YES;
         }
-    }
-    else if ([scheme isEqualToString:@"sysshake"]) {    // 摇一摇
+    } else if ([scheme isEqualToString:@"sysshake"]) {    // 摇一摇
         js = [NSString stringWithFormat:@"nativeCallback({'type': '%@'})", scheme];
-    }
-    else if ([scheme isEqualToString:@"pop"]) {         // 导航栏返回
+    } else if ([scheme isEqualToString:@"pop"]) {         // 导航栏返回
         [vc.navigationController popViewControllerAnimated:YES];
-    }
-    else if ([scheme isEqualToString:@"goback"]) {      // 浏览器返回
+    } else if ([scheme isEqualToString:@"goback"]) {      // 浏览器返回
         int gobackpage = [host intValue];
         [self handleGoback:webview page:gobackpage];
-    }
-    else if ([scheme isEqualToString:@"goforward"]) {   // 浏览器前进
+    } else if ([scheme isEqualToString:@"goforward"]) {   // 浏览器前进
         int forwardpage = [host intValue];
         [self handleGoForward:webview page:forwardpage];
-    }
-    else if ([scheme isEqualToString:@"share"]) {       // 分享
+    } else if ([scheme isEqualToString:@"share"]) {       // 分享
         [vc navigationMenuButtonClicked];
+    } else if ([scheme isEqualToString:@"nativepage"]) {  // 跳转到原生页面
+        //[vc.navigationController pushViewController:nil animated:YES];
     }
     
     // 执行 JS 回调

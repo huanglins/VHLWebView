@@ -60,14 +60,14 @@
 
 - (IBAction)goWebView:(id)sender {
     VHLWebViewController *webVC = [[VHLWebViewController alloc] init];
-    [webVC loadURL:[NSURL URLWithString:@"https://www.bing.com"]];
+    [webVC loadURL:[NSURL URLWithString:@"http://127.0.0.1:8020/vweb/hybrid1.html"]];
     webVC.progressTintColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.navButtonTitleColor = [UIColor colorWithRed:0.2143 green:0.4838 blue:0.9132 alpha:1.0];
     webVC.webScrollViewBGColor = [UIColor whiteColor];
     webVC.navBackButtonTitle = @"首页";
     webVC.allowsLinkPreview = YES;
     webVC.fullScreenDisplay = YES;
-    webVC.hideSourceLabel = YES;
+    webVC.hideSourceLabel = NO;
     //webVC.webBounces = NO;
     [webVC vhl_setNavBarShadowImageHidden:NO];
     [webVC vhl_setNavBarBackgroundAlpha:0.0f];

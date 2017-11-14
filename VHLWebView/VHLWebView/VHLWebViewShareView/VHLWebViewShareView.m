@@ -10,6 +10,9 @@
 #import "VHLWebViewShareViewDefine.h"
 #import "VHLWebViewShareSpaceView.h"
 
+#define VHLWebShareView_iPhoneX ([UIScreen instancesRespondToSelector:@selector(currentMode)] ? \
+CGSizeEqualToSize(CGSizeMake(1125, 2436), [[UIScreen mainScreen] currentMode].size) : NO)
+
 @interface VHLWebViewShareView()
 
 @property (nonatomic, strong) UIView *dimBackgroundView;                /**< 半透明黑色背景 */
@@ -65,6 +68,9 @@
     
     CGRect frame = self.shareSpaceView.frame;
     frame.origin.y = VHL_SCREEN_HEIGTH - self.shareSpaceView.shareSpaceHeight;
+    if (VHLWebShareView_iPhoneX) {
+        frame.origin.y -= 30;
+    }
     self.shareSpaceView.frame = frame;
     [self.shareSpaceView layoutSubviews];
 }
@@ -90,6 +96,9 @@
         
         CGRect frame = self.shareSpaceView.frame;
         frame.origin.y = VHL_SCREEN_HEIGTH - self.shareSpaceView.shareSpaceHeight;
+        if (VHLWebShareView_iPhoneX) {
+            frame.origin.y -= 30;
+        }
         self.shareSpaceView.frame = frame;
     } completion:completion];
 }
@@ -146,9 +155,10 @@
 - (UIButton *)cancelButton {
     return self.shareSpaceView.cancelButton;
 }
-#pragma mark - 
+#pragma mark -
 - (void)handleDeviceOrientationDidChange:(UIInterfaceOrientation)interfaceOrientation
 {
     [self setNeedsLayout];
 }
 @end
+

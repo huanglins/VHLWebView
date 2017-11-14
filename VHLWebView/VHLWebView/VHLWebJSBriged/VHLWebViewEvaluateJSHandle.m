@@ -21,8 +21,7 @@ static  NSString * const jsGetImages = @"function getImages(){\
 getImages();";
 
 // 单例
-+ (instancetype)shareInstance
-{
++ (instancetype)shareInstance {
     static dispatch_once_t onceToken;
     static VHLWebViewEvaluateJSHandle *evaluatejsHandle = nil;
     dispatch_once(&onceToken, ^{
@@ -31,7 +30,8 @@ getImages();";
     return evaluatejsHandle;
 }
 
-- (void)evaluateJSWebView:(WKWebView *)webview {
+// 全局的JS执行
+- (void)evaluateJSWebView:(WKWebView *)webview viewController:(UIViewController *)vc {
     NSString *host = webview.URL.host;
     // 1. 获取当前网页下所有图片链接的数组
     {

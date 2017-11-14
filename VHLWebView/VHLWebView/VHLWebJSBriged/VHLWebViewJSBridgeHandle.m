@@ -7,31 +7,56 @@
 //
 
 #import "VHLWebViewJSBridgeHandle.h"
-#import <UIKit/UIKit.h>
+#import "VHLWebViewController.h"
 
 @interface VHLWebViewJSBridgeHandle()
 
 @property (nonatomic, weak) UIViewController *viewController;
-@property (nonatomic, strong) WKWebViewJavascriptBridge *bridge;
+@property (nonatomic, weak) WKWebViewJavascriptBridge *bridge;
+@property (nonatomic, weak) WKWebView *webView;
 
 @end
 
 @implementation VHLWebViewJSBridgeHandle
 
-- (instancetype)initWithVC:(UIViewController *)viewController jsBridge:(WKWebViewJavascriptBridge *)bridge {
+- (instancetype)initWithVC:(UIViewController *)viewController jsBridge:(WKWebViewJavascriptBridge *)bridge webView:(WKWebView *)webview {
     if (self = [super init]) {
         self.viewController = viewController;
         self.bridge = bridge;
+        self.webView = webview;
     }
     return self;
 }
 /*
  *  系统相关功能的 JS/Native 交互
  */
-- (void)jsSystemHanlde
-{
+- (void)jsSystemHanlde {
+    // 调用分享面板
     [_bridge registerHandler:@"native_share" handler:^(id data, WVJBResponseCallback responseCallback) {
-        NSLog(@"native_share");
+        [(VHLWebViewController *)self.viewController navigationMenuButtonClicked];
+    }];
+    // 网页是否可以回弹 ('native_bounces', {'value': 1}, ...)
+    [_bridge registerHandler:@"native_bounces" handler:^(id data, WVJBResponseCallback responseCallback) {
+        self.webView.scrollView.bounces = [data[@"value"] intValue] == 1?YES:NO;
+    }];
+    // pop
+    [_bridge registerHandler:@"native_page_pop" handler:^(id data, WVJBResponseCallback responseCallback) {
+        [self.viewController.navigationController popViewControllerAnimated:YES];
+    }];
+    // 跳转到原生页面
+    /**
+     {"handlerName":"native_page_push","data":{"class":"vc"}}
+    */
+    [_bridge registerHandler:@"native_page_push" handler:^(id data, WVJBResponseCallback responseCallback) {
+        if (data && [data isKindOfClass:[NSDictionary class]]) {
+            NSString *classNmae = data[@"class"]?:@"";      // ViewController Class
+            if (classNmae && ![classNmae isEqualToString:@""]) {
+                id newClass = [[NSClassFromString(classNmae) alloc] init];
+                if (newClass) {
+                    [self.viewController.navigationController pushViewController:newClass animated:YES];
+                }
+            }
+        }
     }];
 }
 /**
@@ -47,8 +72,7 @@
     }];
 }
 /** JS主动发出消息*/
-- (void)jsCallback:(NSDictionary *)data
-{
+- (void)jsCallback:(NSDictionary *)data {
     [_bridge callHandler:@"nativeCallback" data:data responseCallback:^(id responseData) {
         NSLog(@"JS Bridge: %@", responseData);
     }];

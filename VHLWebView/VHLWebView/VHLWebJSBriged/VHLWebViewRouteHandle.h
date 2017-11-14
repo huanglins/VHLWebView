@@ -11,7 +11,7 @@
 #import <WebKit/WebKit.h>
 
 /*
-    拦截 url，判断是否能处理
+    通过拦截 url，进行js和原生交互。判断是否能处理。
  */
 @interface VHLWebViewRouteHandle : NSObject
 // 单例

@@ -14,7 +14,7 @@
 #endif
 
 #import <UIKit/UIKit.h>
-
+#import <WebKit/WebKit.h>
 // iOS 8 以后使用 WKWebView
 #import "WKWebViewJavascriptBridge.h"
 
@@ -57,10 +57,11 @@ NS_ASSUME_NONNULL_BEGIN
 /** 导航栏按钮颜色(图片，标题)*/
 @property (nonatomic, strong) UIColor *navButtonTitleColor;         // 导航栏按钮颜色(图片，标题)
 
-/** 是否全屏显示，从导航栏顶部开始。默认NO - 不全屏显示*/
+/** 是否全屏显示，从导航栏顶部开始。默认NO - 不全屏显示。 iOS11 下需要在网页meta中设置 viewport-fit=cover*/
 @property (nonatomic, assign, getter=isFullScreenDisplay) BOOL fullScreenDisplay;
 /** 全屏网页 - 导航栏按钮颜色(图片，标题)。默认为白色 */
 @property (nonatomic, strong) UIColor *fnNavButtonTitleColor;       // 导航栏按钮颜色(图片，标题)
+@property (nonatomic, strong) UIColor *fnNavTitleColor;             // 导航栏标题颜色
 
 /** 是否隐藏网页来源lable，默认NO - 显示*/
 @property (nonatomic, assign) BOOL hideSourceLabel;                 // 网页来源lable是否显示
@@ -119,6 +120,11 @@ NS_ASSUME_NONNULL_BEGIN
 @end
 NS_ASSUME_NONNULL_END
 
+
+/**
+    iOS11 下，全屏显示网页 safe-area 问题
+    https://objcer.com/2017/09/21/Understanding-the-WebView-Viewport-in-iOS-11-iPhone-X/
+ */
 
 /*
     使用须知：
