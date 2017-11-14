@@ -1,11 +1,14 @@
 # VHLWebView
-微信支付宝样式的 WKWebView 封装。支持全屏显示，横竖屏切换等等。。
+微信支付宝样式的 WKWebView 封装。支持全屏显示，横竖屏切换，全屏显示等等。。
 
 ![截图](https://github.com/huanglins/VHLWebView/raw/master/screenshots/1.png)
+![截图](https://github.com/huanglins/VHLWebView/raw/master/screenshots/1.gif)
 ![截图](https://github.com/huanglins/VHLWebView/raw/master/screenshots/2.png)
 
 ### 更新记录
 - **增加 全屏显示** 
+
+- **适配iOS11 和 iPhone X**
 
 * **增加 长按保存图片，识别图片二维码**
 
