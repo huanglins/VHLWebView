@@ -150,7 +150,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 @synthesize URL = _URL, webView = _webView, webTitle = _webTitle;
 
 #pragma mark - Life cycle 生命周期
-- (void)dealloc{
+- (void)dealloc {
     // protocol
     [NSURLProtocol unregisterClass:[VHLWebViewNSURLProtocol class]];
     [NSURLProtocol wk_unregisterScheme:@"http"];
@@ -197,8 +197,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
     return self;
 }
-- (instancetype)initWithPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title
-{
+- (instancetype)initWithPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title {
     if (self = [self init]) {
         _webTitle = title;
         self.title = _webTitle;
@@ -264,13 +263,20 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
     
     // NSURLProtocol 接管网络请求协议，但是 POST 中的 Data 被会丢掉
-    //[NSURLProtocol registerClass:[VHLWebViewNSURLProtocol class]];
-    //[VHLWebViewNSURLProtocol setFilterURLPres:[NSSet setWithObjects:@"http",@"https",nil]];
-    //[NSURLProtocol wk_registerScheme:@"http"];
-    //[NSURLProtocol wk_registerScheme:@"https"];
+    // [NSURLProtocol registerClass:[VHLWebViewNSURLProtocol class]];
+    // [VHLWebViewNSURLProtocol setFilterURLPres:[NSSet setWithObjects:@"http",@"https",nil]];
+    // [NSURLProtocol wk_registerScheme:@"http"];
+    // [NSURLProtocol wk_registerScheme:@"https"];
 }
 - (void)viewWillAppear:(BOOL)animated {
     [super viewWillAppear:animated];
+    
+    // 导航栏返回按钮重新设置，不然网页跳转到VC中返回会显示原本的导航栏返回按钮
+    if (self.webview.canGoBack) {
+        self.navigationItem.leftBarButtonItems = @[self.navBackBarButtonItem,self.navCloseBarButtonItem];
+    } else {
+        self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
+    }
     
     if (!_hideWebProgress) {
         [self updateFrameOfProgressView];
@@ -321,13 +327,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 #pragma mark - 屏幕旋转相关方法    ------------------------------------------------
 // 支持设备自动旋转
-- (BOOL)shouldAutorotate
-{
+- (BOOL)shouldAutorotate {
     return YES;
 }
 // 支持竖屏显示
-- (UIInterfaceOrientationMask)supportedInterfaceOrientations
-{
+- (UIInterfaceOrientationMask)supportedInterfaceOrientations {
     return UIInterfaceOrientationMaskPortrait | UIInterfaceOrientationMaskLandscapeLeft | UIInterfaceOrientationMaskLandscapeRight;
 }
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)toInterfaceOrientation {
@@ -397,7 +401,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     _urlRequest.URL = [self verifyURLavailable:request.URL];
     _navigation = [_webView loadRequest:request];
 }
-- (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title{
+- (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title {
     _webTitle = title;
     self.title = _webTitle;
     
@@ -1180,15 +1184,10 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     
     if (self.webview.canGoBack) {
         self.navigationController.interactivePopGestureRecognizer.enabled = NO;
-        if (self.navigationController.viewControllers.count == 1) {
-            [self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem,self.navCloseBarButtonItem] animated:NO];
-        } else {
-            [self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem,self.navCloseBarButtonItem] animated:NO];
-        }
+        self.navigationItem.leftBarButtonItems = @[self.navBackBarButtonItem,self.navCloseBarButtonItem];
     } else {
         self.navigationController.interactivePopGestureRecognizer.enabled = YES;
         self.navigationItem.leftBarButtonItem = self.navBackBarButtonItem;
-        //[self.navigationItem setLeftBarButtonItems:@[self.navBackBarButtonItem] animated:NO];
     }
     if (!_hideNavMenuBarButton) {
         self.navigationItem.rightBarButtonItems = @[self.navMenuBarButtonItem];
@@ -1197,6 +1196,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
     
     // 解决自定义 backBarButtonItem 后侧滑手势不可使用问题
+    //self.navigationController.interactivePopGestureRecognizer.enabled = YES;
     //self.navigationController.fd_fullscreenPopGestureRecognizer.enabled = YES;
 }
 #pragma mark - Actions ---------------------------------------------------------
@@ -1216,12 +1216,11 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     }
 }
 // 点击重新加载
-- (void)reloadClicked:(UIBarButtonItem *)sender {
+- (void)reloadClicked {
     [self willReload];
     
     if ([_webView.URL.resourceSpecifier isEqualToString:kVHL404NotFoundHTMLPath] ||
-        [_webView.URL.resourceSpecifier isEqualToString:kVHLNetworkErrorHTMLPath])
-    {
+        [_webView.URL.resourceSpecifier isEqualToString:kVHLNetworkErrorHTMLPath]) {
         [self loadURL:_URL];
     } else {
         _navigation = [_webView reload];
@@ -1263,20 +1262,18 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 // 导航栏菜单按钮点击，分享
 - (void)navigationMenuButtonClicked {
+    __weak typeof(self) weakSelf = self;
     // 取消当前编辑
     [self.webView endEditing:YES];
     // 1.
     VHLWebViewShareItem *item0 = [VHLWebViewShareItem itemWithTitle:@"微信"
                                                                icon:@"vhl_webview_share_weixin"
                                                             handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-                                                                
+                                                                OSMessage *msg = [[OSMessage alloc] init];
+                                                                msg.title = weakSelf.webView.title;
+                                                                msg.link = weakSelf.webView.URL.absoluteString;
                                                                 msg.desc = @"";
-                                                                
-                                                                msg.image=[UIImage new];
+                                                                msg.image = [UIImage new];
                                                                 msg.multimediaType=OSMultimediaTypeNews;
                                                                 
                                                                 [OpenShare shareToWeixinSession:msg Success:^(OSMessage *message) {
@@ -1288,10 +1285,9 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     VHLWebViewShareItem *item1 = [VHLWebViewShareItem itemWithTitle:@"朋友圈"
                                                                icon:@"vhl_webview_share_timeline"
                                                             handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-                                                                
+                                                                OSMessage *msg = [[OSMessage alloc] init];
+                                                                msg.title = weakSelf.webView.title;
+                                                                msg.link = weakSelf.webView.URL.absoluteString;
                                                                 msg.desc = @"";
                                                                 msg.image = [UIImage new];
                                                                 msg.multimediaType=OSMultimediaTypeNews;
@@ -1305,13 +1301,13 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     VHLWebViewShareItem *item2 = [VHLWebViewShareItem itemWithTitle:@"QQ"
                                                                icon:@"vhl_webview_share_qq"
                                                             handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-                                                                
+                                                                OSMessage *msg = [[OSMessage alloc] init];
+                                                                msg.title = weakSelf.webView.title;
+                                                                msg.link = weakSelf.webView.URL.absoluteString;
                                                                 msg.desc = @"";
+                                                                
                                                                 UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
-                                                                msg.image=image;
+                                                                msg.image = image;
                                                                 msg.thumbnail = image;
                                                                 
                                                                 [OpenShare shareToQQFriends:msg Success:^(OSMessage *message) {
@@ -1323,14 +1319,13 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
     VHLWebViewShareItem *item3 = [VHLWebViewShareItem itemWithTitle:@"QQ空间"
                                                                icon:@"vhl_webview_share_qzone"
                                                             handler:^{
-                                                                OSMessage *msg=[[OSMessage alloc] init];
-                                                                
-                                                                msg.title = self.webView.title;
-                                                                msg.link=self.webView.URL.absoluteString;
-                                                                
+                                                                OSMessage *msg = [[OSMessage alloc] init];
+                                                                msg.title = weakSelf.webView.title;
+                                                                msg.link = weakSelf.webView.URL.absoluteString;
                                                                 msg.desc = @"";
+                                                                
                                                                 UIImage *image = _shareCoverImage?:[UIImage imageNamed:@"vhl_webview_share_qq"];
-                                                                msg.image=image;
+                                                                msg.image = image;
                                                                 msg.thumbnail = image;
                                                                 
                                                                 [OpenShare shareToQQZone:msg Success:^(OSMessage *message) {
@@ -1343,17 +1338,17 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                                                                icon:@"vhl_webview_share_email"
                                                             handler:^{
                                                                 MFMailComposeViewController *mailViewController = [[MFMailComposeViewController alloc] init];
-                                                                mailViewController.mailComposeDelegate = self;
-                                                                [mailViewController setSubject:[self.webView title]];
-                                                                if ([self.webView.URL.scheme isEqualToString:@"file"]) {
-                                                                    [mailViewController setMessageBody:self.URL.absoluteString isHTML:NO];
+                                                                mailViewController.mailComposeDelegate = weakSelf;
+                                                                [mailViewController setSubject:[weakSelf.webView title]];
+                                                                if ([weakSelf.webView.URL.scheme isEqualToString:@"file"]) {
+                                                                    [mailViewController setMessageBody:weakSelf.URL.absoluteString isHTML:NO];
                                                                 } else {
-                                                                    [mailViewController setMessageBody:self.webView.URL.absoluteString isHTML:NO];
+                                                                    [mailViewController setMessageBody:weakSelf.webView.URL.absoluteString isHTML:NO];
                                                                 }
                                                                 
                                                                 mailViewController.modalPresentationStyle = UIModalPresentationFormSheet;
                                                                 
-                                                                [self presentViewController:mailViewController animated:YES completion:nil];
+                                                                [weakSelf presentViewController:mailViewController animated:YES completion:nil];
                                                             }];
     VHLWebViewShareItem *item5 = [VHLWebViewShareItem itemWithTitle:@"在Safari中打开"
                                                                icon:@"vhl_webview_share_safari"
@@ -1366,14 +1361,14 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                                                              handler:^{
                                                                  UIPasteboard *pasteboard = [UIPasteboard generalPasteboard];
                                                                  
-                                                                 if ([self.webView.URL.scheme isEqualToString:@"file"]) {
-                                                                     pasteboard.string = self.URL.absoluteString?:@"";
+                                                                 if ([weakSelf.webView.URL.scheme isEqualToString:@"file"]) {
+                                                                     pasteboard.string = weakSelf.URL.absoluteString?:@"";
                                                                  } else {
-                                                                     pasteboard.string = self.webView.URL.absoluteString?:@"";
+                                                                     pasteboard.string = weakSelf.webView.URL.absoluteString?:@"";
                                                                  }
                                                                  // 弹出提示
                                                                  UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"链接已经复制" message:nil preferredStyle:UIAlertControllerStyleAlert];
-                                                                 [self presentViewController:alert animated:YES completion:^{
+                                                                 [weakSelf presentViewController:alert animated:YES completion:^{
                                                                      dispatch_time_t popTime = dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.6 * NSEC_PER_SEC));
                                                                      dispatch_after(popTime, dispatch_get_main_queue(), ^(void){
                                                                          [alert dismissViewControllerAnimated:YES completion:nil];
@@ -1410,16 +1405,16 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
                                                                      NSString *jsStr = [NSString stringWithFormat:@"document.getElementsByTagName('body')[0].style.webkitTextSizeAdjust='%d%%'",scaleValue];
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_8_0
                                                                      
-                                                                     [self.webView evaluateJavaScript:jsStr completionHandler:nil];
+                                                                     [weakSelf.webView evaluateJavaScript:jsStr completionHandler:nil];
 #else
-                                                                     [self.webView stringByEvaluatingJavaScriptFromString:jsStr];
+                                                                     [weakSelf.webView stringByEvaluatingJavaScriptFromString:jsStr];
 #endif
                                                                  }];
                                                              }];
     VHLWebViewShareItem *item13 = [VHLWebViewShareItem itemWithTitle:@"刷新"
                                                                 icon:@"vhl_webview_action_refresh"
                                                              handler:^{
-                                                                 [self reloadClicked:nil];
+                                                                 [weakSelf reloadClicked];
                                                              }];
     NSArray *shareItemsArray = @[item0,item1,item2,item3,item4,item5];
     if (!_URL) {        // 如果没有URL，那么就不显示 [在Safari打开]
@@ -1454,8 +1449,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
         else {
             [_progressView setProgress:_progressView.progress + 0.05 animated:YES];
         }
-    }
-    else {
+    } else {
         [_progressView setProgress:_progressView.progress + 0.05 animated:YES];
         if (_progressView.progress >= 0.9) {
             _progressView.progress = 0.9;
@@ -1514,17 +1508,16 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
             }
             [webVC.webView goBack];
             return NO;
-        }else{
+        } else {
             return YES;
         }
-    }else{
+    } else {
         return YES;
     }
 }
 #pragma mark - 清理缓存 ----------------------------------------------------------
 /** 清理缓存*/
-+ (void)clearCache
-{
++ (void)clearCache {
 #if __IPHONE_OS_VERSION_MAX_ALLOWED >= __IPHONE_9_0
     // 清理所有类型的缓存数据
     NSSet *websiteDataTypes = [WKWebsiteDataStore allWebsiteDataTypes];
@@ -1550,8 +1543,7 @@ static NSString* const kVHLWebTextSizeAdjustUD = @"cn.vincents.vhlwebview.webTex
 }
 #pragma mark - 系统事件 ----------------------------------------------------------
 // System - 系统相关事件
-- (void) motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event
-{
+- (void) motionBegan:(UIEventSubtype)motion withEvent:(UIEvent *)event {
     if (motion == UIEventSubtypeMotionShake) {          // 摇一摇
         [[VHLWebViewRouteHandle shareInstance] handlePath:[NSURL URLWithString:@"sysShake://"] vc:self webview:self.webView];
         [self.vhlJSBridgeHandle jsCallback:@{@"type": @"sysShake"}];

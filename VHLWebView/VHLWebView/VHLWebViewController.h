@@ -93,10 +93,15 @@ NS_ASSUME_NONNULL_BEGIN
 - (void)loadHTMLString:(NSString *)HTMLString baseURL:(NSURL *)baseURL;
 - (void)loadRequest:(NSMutableURLRequest *)request;
 - (void)loadPostRequestURL:(NSString *)url postData:(NSDictionary *)parameters title:(NSString *)title;
-/** 执行JS*/
-- (void)evaluateJavaScript:(NSString *)js;
+
+/** 刷新当前网页*/
+- (void)reloadClicked;
+/** 修改导航栏按钮显示*/
+- (void)updateNavigationItems;
 /** 调用右上角分享*/
 - (void)navigationMenuButtonClicked;
+/** 执行JS*/
+- (void)evaluateJavaScript:(NSString *)js;
 /** 清理缓存*/
 + (void)clearCache;
 // < 子类可以重写该方法 >

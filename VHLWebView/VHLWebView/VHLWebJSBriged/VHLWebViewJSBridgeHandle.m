@@ -19,6 +19,9 @@
 
 @implementation VHLWebViewJSBridgeHandle
 
+- (void)dealloc {
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+}
 - (instancetype)initWithVC:(UIViewController *)viewController jsBridge:(WKWebViewJavascriptBridge *)bridge webView:(WKWebView *)webview {
     if (self = [super init]) {
         self.viewController = viewController;
@@ -31,8 +34,14 @@
  *  系统相关功能的 JS/Native 交互
  */
 - (void)jsSystemHanlde {
+    // 是否显示右上角分享按钮 value:0/1   0:不显示，1:显示
+    [_bridge registerHandler:@"native_nav_right_show" handler:^(id data, WVJBResponseCallback responseCallback) {
+        ((VHLWebViewController *)self.viewController).hideNavMenuBarButton = [data[@"value"] intValue] == 0?YES:NO;
+        [((VHLWebViewController *)self.viewController) updateNavigationItems];
+    }];
     // 调用分享面板
     [_bridge registerHandler:@"native_share" handler:^(id data, WVJBResponseCallback responseCallback) {
+        // url title des cover
         [(VHLWebViewController *)self.viewController navigationMenuButtonClicked];
     }];
     // 网页是否可以回弹 ('native_bounces', {'value': 1}, ...)
@@ -46,15 +55,20 @@
     // 跳转到原生页面
     /**
      {"handlerName":"native_page_push","data":{"class":"vc"}}
-    */
+     */
     [_bridge registerHandler:@"native_page_push" handler:^(id data, WVJBResponseCallback responseCallback) {
-        if (data && [data isKindOfClass:[NSDictionary class]]) {
+        if (data && ![data isKindOfClass:[NSNull class]]) {
             NSString *classNmae = data[@"class"]?:@"";      // ViewController Class
             if (classNmae && ![classNmae isEqualToString:@""]) {
                 id newClass = [[NSClassFromString(classNmae) alloc] init];
                 if (newClass) {
+                    ((UIViewController *)newClass).hidesBottomBarWhenPushed = YES;
                     [self.viewController.navigationController pushViewController:newClass animated:YES];
+                } else {
+                    responseCallback(@{@"rs":@"0", @"info": @"class 类名错误"});
                 }
+            } else {
+                responseCallback(@{@"rs":@"0", @"info": @"请传入 class 名称"});
             }
         }
     }];
